@@ -1,0 +1,73 @@
+---
+
+tompkins:
+  label: "Tompkins et al. (1956)"
+  l: [2.3, 2.6]
+  m: [5.0, 6.0]
+  n: 1.9
+
+claren:
+  label: "Claren & Diana (1969b)"
+  l: 2.0
+  m: 4.0
+  n: [2.5, 3, 1.5]
+
+seppa:
+  label: "Seppa (1971)"
+  l: 2.5
+  m: 5.75
+  n: 2.8
+
+rawlings:
+  label: "Rawlings (1983)"
+  l: 2.2
+  m: 5.4
+  n: NULL
+
+cigreA:
+  label: "Lab. A (CIGRE 22.01 1989)"
+  l: 2.0
+  m: 4.0
+  n: NULL
+
+cigreB:
+  label: "Lab. B (CIGRE 22.01 1989)"
+  l: 2.3
+  m: 5.2
+  n: NULL
+
+cigreC:
+  label: "Lab. C (CIGRE 22.01 1989)"
+  l: 2.44
+  m: 5.5
+  n: NULL
+
+kraus:
+  label: "Kraus & Hagedorn (1991)"
+  l: 2.47
+  m: 5.38
+  n: 2.80
+
+noiseux1991:
+  label: "Noiseux (1991)"
+  l: 2.44
+  m: 5.63
+  n: 2.76
+
+tavano:
+  label: "Tavano (1988)"
+  l: [1.9, 2.3]
+  m: [3.8, 4.2]
+  n: NULL
+
+mocks:
+  label: "Möcks & Schmidt (1989)"
+  l: 2.45
+  m: 5.38
+  n: 2.4
+
+pdm:
+  label: "Mech. Lab Politecnico di Milano (2000)"
+  l: 2.43
+  m: 5.5
+  n: 2

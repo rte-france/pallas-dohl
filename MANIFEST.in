@@ -1,0 +1,6 @@
+include src/dohl/config.ini
+include src/dohl/damping_power_data.yaml
+include src/dohl/wind_power_data.yaml
+include src/dohl/qreg_input.csv
+include src/dohl/raw_fatigue_conductors.csv
+include src/dohl/raw_def_conductor_layers.csv
