@@ -17,12 +17,12 @@ Before starting to edit the code to make a change, it is often advisable to open
 When contributing to this project, you must agree that you have authored 100% of the content, that you have the necessary rights to the content and that the content you contribute may be provided under the project licence.
 
 You will then need to submit a pull request (PR). To do so, you will need to:
-- Create a fork of Capytaine on Github (that is a copy on which you have full write access).
+- Create a fork of DOHL on Github (that is a copy on which you have full write access).
 - Clone your fork locally on your computer (or add your fork as a new remote to a local git repository).
 - On your local git repository, create a new branch dedicated to the bug fix or feature that you want to contribute.
 - Create as many commits as you'd like in this branch.
 - Push the branch to your fork on Github.
-- On Github's web interface, create a new pull request in the main DOHL repository at https://github.com/rte-france/pallas-dohl, requesting to merge the branch on your fork into the main branch of the original Capytaine repository.
+- On Github's web interface, create a new pull request in the main DOHL repository at https://github.com/rte-france/pallas-dohl, requesting to merge the branch on your fork into the main branch of the original DOHL repository.
 - Until the pull request is accepted, the maintainers can edit the branch on your fork with you.
 - Once the pull request is merged, the branch can be deleted or forgotten.
 
