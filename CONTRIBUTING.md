@@ -6,7 +6,7 @@ If you consider contributing to this repository, please read the relevant sectio
 
 ## Questions and issues
 
-The best place to ask question and report issues is the [Issue](https://github.com/rte-france/pallas-dohl/issues/) section of the [Github repository](https://github.com/rte-france/pallas-dohl).
+The best place to ask questions and report issues is the [Issue](https://github.com/rte-france/pallas-dohl/issues/) section of the [Github repository](https://github.com/rte-france/pallas-dohl).
 You can use the search function of Github to look for previous similar questions.
 For sensitive issues or to request private paid support, you can send a message to <opensource@mews-labs.com>.
 
