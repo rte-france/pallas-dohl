@@ -7,10 +7,10 @@ The script executes different damping power methods and plots the output as func
 freq, tension)
 
 
-.. image:: ../../examples/damping_power.png
+.. image:: img/damping_power.png
    :width: 600
 
-Safe border line 
+Safe border line
 =================
 This example can be reproduced by executing the script called 'safe_border_line.py' located in the
 examples folder.
@@ -19,5 +19,5 @@ The script calculates the safe border line for single and multi layer acsr condu
 
 This figure shows a comparison between fatigue tests done in laboratory and the sbl method :
 
-.. image:: ../../examples/compare.png
+.. image:: img/compare.png
    :width: 600
