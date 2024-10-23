@@ -1,10 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from dohl import damage as dmg
 from dohl import ebp
 
 
 def _aster570_data():
+    """"Conductor data for aster570."""
     m = 1.571
     D = 3.105E-02
     rts = 1.853E+05
@@ -18,20 +18,29 @@ def _aster570_data():
 
 
 if __name__ == '__main__':
+
+    import matplotlib
+
+    matplotlib.use('TkAgg')
+    plt.close('all')
+
+    # get conductor data
     m, d, rts, EImin, EImax, alpha, _, _, _ = _aster570_data()
+
+    # variation of ymax, frequency and mechanical tension
     y = np.linspace(0., 1., 1001)[1:] * d
     f = np.linspace(0., 100, 1001)[1:]
     t = np.linspace(0.05, 0.30, 1001) * rts
     x0 = alpha * t / rts
     dc = dict(d=d, mu=m, rts=rts, EImin=EImin, EImax=EImax)
 
+    # get list of damping power methods, remove olla (slow), use olla-approx only instead
     mth = ebp._damping_power_methods()
-
     _ = mth.pop(6)
 
+    # loop on methods, plots
     fig, ax = plt.subplots(nrows=1, ncols=3)
     ix = 499
-
     for mt in ['foti', 'olla_approx', 'pdm']:
         X = y
         Y = ebp.damping_power(X, f[ix], t[ix], method=mt, x0=x0[ix], **dc)
@@ -53,4 +62,4 @@ if __name__ == '__main__':
         ax[i].grid(True)
         ax[i].legend()
 
-    plt.savefig('damping_power.png')
+    plt.show()
