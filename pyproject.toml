@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 name = "dohl"
 version = "2024.0.0"
 authors = [
-    { name = "Rte R&D and Mews Labs", email = "emmanuel.cieren@mews-labs.com },
+    { name = "Rte R&D and Mews Labs", email = "emmanuel.cieren@mews-labs.com" },
 ]
 description = "Damage in Overhead Lines application."
 readme = "README.md"

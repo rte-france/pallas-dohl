@@ -14,11 +14,10 @@ source $VENV/bin/activate
 # -- upgrade pip
 python3 -m pip install --upgrade pip
 
-# -- install requirements
-pip install -r requirements.txt
-
 # -- install local package
-cd .. && pip install .
+cd ..
+rm -rf build
+pip install .[examples,test]
 
 # -- end text
 echo "---"
