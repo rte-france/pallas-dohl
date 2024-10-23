@@ -1,36 +1,31 @@
+import os
+
+import matplotlib.pyplot as plt
 import numpy as np
 from dohl import damage as dmg
-import matplotlib.pyplot as plt
 
-def _aster570_data():
-    m = 1.571
-    D = 3.105E-02
-    rts = 1.853E+05
-    EImin = 2.828E+01
-    EImax = 2.155E+03
-    alpha = 0.140652249164
-    young = 6.8E+10
-    d = 3.45E-03
-    ml = False
-    return m, D, rts, EImin, EImax, alpha, young, d, ml
+if __name__ == '__main__':
 
+    import matplotlib
 
+    matplotlib.use('TkAgg')
+    plt.close('all')
 
-if __name__ == '__main__' :
-
-    im1 = plt.imread('./data/fatigue_test_1_layer.png')
-    im2 = plt.imread('./data/fatigue_test_2_layers.png')
-    im3 = plt.imread('./data/fatigue_test_3_layers.png')
+    # read images (screenshots from orange book)
+    rep = os.path.join('data')
+    im1 = plt.imread(os.path.join(rep, 'fatigue_test_1_layer.png'))
+    im2 = plt.imread(os.path.join(rep, 'fatigue_test_2_layers.png'))
+    im3 = plt.imread(os.path.join(rep, 'fatigue_test_3_layers.png'))
     img = [im1, im2, im3]
 
-    N = np.logspace(5, 9, 41)
+    # -- compare sbl with data points
 
-    fig, ax = plt.subplots(nrows=1, ncols=3)
-    fig.set_size_inches(30, 10.5)
+    fig, ax = plt.subplots(figsize=(12.8, 4.8), nrows=1, ncols=3)
     plt.suptitle('EPRI 2009 data (figures 3.2-23 to 3.2-25)')
+    N = np.logspace(5, 9, 41)
     for i in range(3):
         ax[i].set_xscale('log')
-        ax[i].set_xlim([1E+05, 1E+09])
+        ax[i].set_xlim(N[[0, -1]])
         ax[i].set_xlabel('Num cycles at first wire break')
         ax[i].set_ylabel('Fictive stress (MPa)')
         ax[i].set_title('Fatigue test of %s-layer ACSR' % (['one', 'two', 'three'][i],))
@@ -45,8 +40,7 @@ if __name__ == '__main__' :
         ax[i].semilogx(N, dmg.safe_border_line(N, True), label='multi layer acsr')
         ax[i].legend()
 
-    plt.savefig('compare.png', bbox_inches='tight')
-    # --
+    # -- plot safe border line
 
     N = np.logspace(0, 16, 1601)
     s = np.logspace(-2, +3, 1501)
@@ -60,7 +54,7 @@ if __name__ == '__main__' :
     plt.xlabel('Number of cycles (N)')
     plt.ylabel('Fictive stress ($\sigma$, MPa)')
 
-    plt.savefig('sbl.png')
+    # -- plot inverse safe border line
 
     plt.figure()
     plt.loglog(s, dmg.inv_safe_border_line(s, False), label='single layer acsr')
@@ -71,4 +65,6 @@ if __name__ == '__main__' :
     plt.xlabel('Fictive stress ($\sigma$, MPa)')
     plt.ylabel('Number of cycles (N)')
 
-    plt.savefig('isbl.png')
+    # --
+
+    plt.show()
