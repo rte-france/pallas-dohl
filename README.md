@@ -15,7 +15,7 @@ _**dohl**_ is a python package proposed to evaluate damage in overhead lines.
 To install the package using pip, execute the following command :
 
 ```shell script
-python -m pip install git+https://gitlab.eurobios.com/rte/dohl.git
+python -m pip install git+https://github.com/rte-france/pallas-dohl
 ```
 
 Or by downloading the package and executing in the repo :
@@ -119,10 +119,10 @@ fsba = 'min'
 x0 = alpha * h / rts
 
 # Calculate your damage
-ym, sg, ls = damage_year(u, h, D, d, mu, young, EImin, EImax,
-                         wind_method='cigre', damping_method=dm,
-                         fictive_stress_method=fsm, fsba=fsba,
-                         multilayer=ml, rts=rts, x0=x0)
+ym, yb, sg, ls = damage_year(u, h, D, d, mu, young, EImin, EImax,
+                             wind_method='cigre', damping_method=dm,
+                             fictive_stress_method=fsm, fsba=fsba,
+                             multilayer=ml, rts=rts, x0=x0)
 
 ```
 
