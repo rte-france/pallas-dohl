@@ -9,7 +9,7 @@ cfg = configparser.ConfigParser()
 cfg.read(os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.ini"))
 
 
-class _EpriData(object):
+class _EpriData:
     _wind_power = None
     _damping_power = None
 
@@ -19,7 +19,7 @@ class _EpriData(object):
             filename = os.path.join(
                 os.path.dirname(os.path.realpath(__file__)), cfg["wind_power"]["file"]
             )
-            with open(filename, "r") as f:
+            with open(filename) as f:
                 _EpriData._wind_power = yaml.safe_load(f)
         return _EpriData._wind_power
 
@@ -30,12 +30,12 @@ class _EpriData(object):
                 os.path.dirname(os.path.realpath(__file__)),
                 cfg["damping_power"]["file"],
             )
-            with open(filename, "r") as f:
+            with open(filename) as f:
                 _EpriData._damping_power = yaml.safe_load(f)
         return _EpriData._damping_power
 
 
-class _FatigueData(object):
+class _FatigueData:
     _dat = None
 
     @staticmethod

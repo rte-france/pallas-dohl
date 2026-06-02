@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Tests for dohl.stockbridge."""
 
 import numpy as np

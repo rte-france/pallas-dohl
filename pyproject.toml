@@ -12,7 +12,7 @@ authors = [
 ]
 description = "Damage in Overhead Lines application."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
@@ -31,12 +31,10 @@ examples = ["matplotlib >= 3.4.3", ]
 test = [
     "pytest >= 7.2.2",
     "pytest-cov >= 6.0.0",
-    "pylint >= 3.3.1"
 ]
 lint = [
-    "flake8 >= 7.3.0",
+    "ruff >= 0.6.0",
     "mypy >= 1.13.0",
-    "black",
 ]
 dev = [
     { include-group = 'test' },
@@ -66,9 +64,22 @@ exclude_lines = [
     "if __name__ == .__main__.:",
 ]
 
-[tool.black]
+[tool.ruff]
 line-length = 100
-target-version = ["py310"]
+target-version = "py310"
+extend-exclude = ["src/dohl/_fatigue_model_input.py"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = [
+    "E501",  # line too long (the formatter handles it)
+    "E741",  # ambiguous single-char names (l, m, n are intentional in damping formulas)
+    "E203",  # formatter-incompatible whitespace rule
+    "B006",  # mutable default arg (now fixed via Optional[dict] = None)
+]
+
+[tool.ruff.format]
+line-ending = "auto"
 
 [tool.mypy]
 python_version = "3.10"

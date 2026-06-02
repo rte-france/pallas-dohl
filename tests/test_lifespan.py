@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Tests for dohl.lifespan."""
 
 import numpy as np

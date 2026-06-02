@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Tests for dohl.ebp (Energy Balance Principle)."""
 
 import numpy as np

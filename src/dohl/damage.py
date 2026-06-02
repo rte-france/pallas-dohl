@@ -1,5 +1,3 @@
-from typing import Union
-
 import numpy as np
 
 
@@ -221,7 +219,7 @@ def fictive_stress(
     method: str = "fymax",
     xb: np.ndarray = 0.089,
     return_yb=False,
-) -> Union[float, tuple]:
+) -> float | tuple:
     """Compute the fictive stress.
 
     Parameters
@@ -265,7 +263,7 @@ def fictive_stress(
         elif method == "ba_pfs":
             yb = _ampl_pbs(ymax, freq, tension, mu, EI, xb)
         else:
-            raise ValueError("Unrecognized method %s" % (method,))
+            raise ValueError(f"Unrecognized method {method}")
         sigma = fictive_stress_xyb(yb, tension, d, young, EI, xb=xb)
 
     if return_yb:
@@ -467,6 +465,7 @@ def _qreg_apply(x, y, z, t, c) -> np.ndarray:
 
 def _qreg_fit_coeffs(q):
     from sklearn.linear_model import QuantileRegressor
+
     from dohl.config import _FatigueData
 
     if q < 0.0 or q > 1:

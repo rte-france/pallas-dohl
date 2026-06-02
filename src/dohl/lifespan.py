@@ -1,10 +1,7 @@
-from typing import Optional
-
 import numpy as np
 import scipy.stats
 
-from dohl import damage
-from dohl import ebp
+from dohl import damage, ebp
 
 _wind_speed_min = 0.0
 _wind_speed_max = 15.0
@@ -29,7 +26,7 @@ def damage_year(
     fsba: str = "avg",
     rts: np.ndarray = None,
     x0: np.ndarray = None,
-    stockbridge_cfg: Optional[dict] = None,
+    stockbridge_cfg: dict | None = None,
 ) -> tuple:
     """Estimate sustained damage in a year.
 
@@ -156,7 +153,7 @@ def damage_history(
     fsba: str = "avg",
     rts: np.ndarray = None,
     beta: np.ndarray = None,
-    stockbridge_cfg: Optional[dict] = None,
+    stockbridge_cfg: dict | None = None,
 ) -> tuple:
     """Estimate sustained damage over a time-period.
 
@@ -277,7 +274,7 @@ def damage_year_weibull(
     fsba: str = "avg",
     rts: float = None,
     x0: float = None,
-    stockbridge_cfg: Optional[dict] = None,
+    stockbridge_cfg: dict | None = None,
 ) -> float:
     """Sustained damage of a cable with wind history as a Weibull distribution.
 
@@ -387,7 +384,7 @@ def damage_year_weibull_array(
     fsba: str = "avg",
     rts: np.ndarray = None,
     x0: np.ndarray = None,
-    stockbridge_cfg: Optional[dict] = None,
+    stockbridge_cfg: dict | None = None,
 ) -> np.ndarray:
     """Sustained damage of a cable with wind history as a Weibull distribution.
 

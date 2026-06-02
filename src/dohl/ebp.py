@@ -1,9 +1,8 @@
-from typing import Optional
-
 import numpy as np
+from scipy.optimize import bisect
+
 from dohl.config import _EpriData
 from dohl.stockbridge import power
-from scipy.optimize import bisect
 
 
 def _wind_power_methods():
@@ -234,7 +233,7 @@ def damping_power_foti(
     elif mode == "micro":
         return G1(0.25) * Pms
     else:
-        raise ValueError("'%s' unknown" % mode)
+        raise ValueError(f"'{mode}' unknown")
 
 
 def damping_power_cieren(
@@ -539,7 +538,7 @@ def ymax(
     EImin: np.ndarray = None,
     EImax: np.ndarray = None,
     x0: np.ndarray = None,
-    stockbridge_cfg: Optional[dict] = None,
+    stockbridge_cfg: dict | None = None,
     tol: float = 1.0e-06,
     maxiter: int = 64,
 ) -> np.ndarray:

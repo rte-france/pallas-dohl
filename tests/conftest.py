@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Shared fixtures for dohl tests.
 
 The Aster570 conductor parameters used throughout the test suite mirror

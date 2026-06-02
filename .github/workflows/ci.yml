@@ -64,11 +64,11 @@ jobs:
       - name: Install lint deps
         run: uv sync --group lint
 
-      - name: black --check
-        run: uv run black --check src/dohl tests
+      - name: ruff check
+        run: uv run ruff check src/dohl tests
 
-      - name: flake8
-        run: uv run flake8 src/dohl tests
+      - name: ruff format --check
+        run: uv run ruff format --check src/dohl tests
 
       - name: mypy (advisory)
         continue-on-error: true
