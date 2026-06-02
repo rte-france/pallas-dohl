@@ -5,8 +5,14 @@ from typing import Union
 import numpy as np
 
 
-def fictive_stress_fymax(ymax: np.ndarray, freq: np.ndarray, d: np.ndarray, mu: np.ndarray,
-                         young: np.ndarray, EI: np.ndarray) -> float:
+def fictive_stress_fymax(
+    ymax: np.ndarray,
+    freq: np.ndarray,
+    d: np.ndarray,
+    mu: np.ndarray,
+    young: np.ndarray,
+    EI: np.ndarray,
+) -> float:
     """Compute the fictive stress.
 
     Orange Book -- chap 'fatigue of overhead conductors'
@@ -35,8 +41,9 @@ def fictive_stress_fymax(ymax: np.ndarray, freq: np.ndarray, d: np.ndarray, mu: 
     return np.pi * d * young * np.sqrt(mu / EI) * freq * ymax
 
 
-def _wavelength(freq: np.ndarray, tension: np.ndarray, mu: np.ndarray,
-                EI: np.ndarray) -> np.ndarray:
+def _wavelength(
+    freq: np.ndarray, tension: np.ndarray, mu: np.ndarray, EI: np.ndarray
+) -> np.ndarray:
     """Get cable wavelength.
 
     Based on a beam vibration model, from CIGRE, *Report on aeolian vibration*,
@@ -63,8 +70,14 @@ def _wavelength(freq: np.ndarray, tension: np.ndarray, mu: np.ndarray,
     return np.sqrt(tension * s + np.sqrt(s * (tension + 8 * np.pi**2 * EI)))
 
 
-def _ampl_cigre(ymax: np.ndarray, freq: np.ndarray, tension: np.ndarray, mu: np.ndarray,
-                EI: np.ndarray, x: np.ndarray) -> np.ndarray:
+def _ampl_cigre(
+    ymax: np.ndarray,
+    freq: np.ndarray,
+    tension: np.ndarray,
+    mu: np.ndarray,
+    EI: np.ndarray,
+    x: np.ndarray,
+) -> np.ndarray:
     """Corrected amplitude.
 
     Based on a beam vibration model, from CIGRE, *Report on aeolian vibration*,
@@ -93,16 +106,26 @@ def _ampl_cigre(ymax: np.ndarray, freq: np.ndarray, tension: np.ndarray, mu: np.
     """
     w = _wavelength(freq, tension, mu, EI)
     q = 0.5 * tension / EI
-    r = (2. * np.pi * freq)**2 * mu / EI
+    r = (2.0 * np.pi * freq) ** 2 * mu / EI
     a = np.sqrt(+q + np.sqrt(r + q**2))
     b = np.sqrt(-q + np.sqrt(r + q**2))
-    y = np.sin(b * x) - b * (
-            np.sin(a * x) + np.tanh(0.5 * a * w) * (np.cos(b * x) - np.cosh(a * x))) / a
+    y = (
+        np.sin(b * x)
+        - b
+        * (np.sin(a * x) + np.tanh(0.5 * a * w) * (np.cos(b * x) - np.cosh(a * x)))
+        / a
+    )
     return ymax * y
 
 
-def _ampl_pbs(ymax: np.ndarray, freq: np.ndarray, tension: np.ndarray, mu: np.ndarray,
-              EI: np.ndarray, x: np.ndarray) -> np.ndarray:
+def _ampl_pbs(
+    ymax: np.ndarray,
+    freq: np.ndarray,
+    tension: np.ndarray,
+    mu: np.ndarray,
+    EI: np.ndarray,
+    x: np.ndarray,
+) -> np.ndarray:
     """Corrected amplitude.
 
     Based on J.C. Poffenberger, R.L. Swart, *Differential displacement and dynamic
@@ -131,14 +154,20 @@ def _ampl_pbs(ymax: np.ndarray, freq: np.ndarray, tension: np.ndarray, mu: np.nd
     """
     w = _wavelength(freq, tension, mu, EI)
     p = np.sqrt(EI / tension)
-    q = (w - 2. * p) / (2. * np.pi * p)
-    num = q * np.sin(2. * np.pi * x / w) + np.exp(-x / p) - 1 + 2. * x / w
+    q = (w - 2.0 * p) / (2.0 * np.pi * p)
+    num = q * np.sin(2.0 * np.pi * x / w) + np.exp(-x / p) - 1 + 2.0 * x / w
     den = q + np.exp(-0.25 * w / p) - 0.5
     return ymax * num / den
 
 
-def fictive_stress_xyb(yb: np.ndarray, tension: np.ndarray, d: np.ndarray, young: np.ndarray,
-                       EI: float, xb: float) -> np.ndarray:
+def fictive_stress_xyb(
+    yb: np.ndarray,
+    tension: np.ndarray,
+    d: np.ndarray,
+    young: np.ndarray,
+    EI: float,
+    xb: float,
+) -> np.ndarray:
     """Compute the fictive stress ratio
 
     (Orange Book -- chap 'fatigue of overhead conductors'
@@ -166,28 +195,37 @@ def fictive_stress_xyb(yb: np.ndarray, tension: np.ndarray, d: np.ndarray, young
     """
     p = np.sqrt(tension / EI)
     num = 0.25 * d * young * p**2
-    den = np.exp(-p * xb) - 1. + p * xb
+    den = np.exp(-p * xb) - 1.0 + p * xb
     return yb * num / den
 
 
 def _fictive_stress_methods() -> list:
     """List of available fictive stress computation methods.
 
-     Parameters
-     ----------
-     None
+    Parameters
+    ----------
+    None
 
-     Returns
-     -------
-     list
-         List of available fictive stress computation methods.
-     """
-    return ['fymax', 'ba_cigre', 'ba_pfs']
+    Returns
+    -------
+    list
+        List of available fictive stress computation methods.
+    """
+    return ["fymax", "ba_cigre", "ba_pfs"]
 
 
-def fictive_stress(ymax: np.ndarray, freq: np.ndarray, tension: np.ndarray, d: np.ndarray,
-                   mu: np.ndarray, young: np.ndarray, EI: np.ndarray, method: str = 'fymax',
-                   xb: np.ndarray = 0.089, return_yb=False) -> Union[float, tuple]:
+def fictive_stress(
+    ymax: np.ndarray,
+    freq: np.ndarray,
+    tension: np.ndarray,
+    d: np.ndarray,
+    mu: np.ndarray,
+    young: np.ndarray,
+    EI: np.ndarray,
+    method: str = "fymax",
+    xb: np.ndarray = 0.089,
+    return_yb=False,
+) -> Union[float, tuple]:
     """Compute the fictive stress.
 
     Parameters
@@ -222,16 +260,16 @@ def fictive_stress(ymax: np.ndarray, freq: np.ndarray, tension: np.ndarray, d: n
     -------
 
     """
-    if method == 'fymax':
+    if method == "fymax":
         sigma = fictive_stress_fymax(ymax, freq, d, mu, young, EI)
         yb = None
     else:
-        if method == 'ba_cigre':
+        if method == "ba_cigre":
             yb = _ampl_cigre(ymax, freq, tension, mu, EI, xb)
-        elif method == 'ba_pfs':
+        elif method == "ba_pfs":
             yb = _ampl_pbs(ymax, freq, tension, mu, EI, xb)
         else:
-            raise ValueError('Unrecognized method %s' % (method,))
+            raise ValueError("Unrecognized method %s" % (method,))
         sigma = fictive_stress_xyb(yb, tension, d, young, EI, xb=xb)
 
     if return_yb:
@@ -254,8 +292,8 @@ def _mlc() -> tuple:
      -------
      tuple
          N Threshold, a1, b1, a2, b2
-     """
-    return 1.56E+07, 450., -0.20, 263., -0.17
+    """
+    return 1.56e07, 450.0, -0.20, 263.0, -0.17
 
 
 def _slc() -> tuple:
@@ -272,8 +310,8 @@ def _slc() -> tuple:
      -------
      tuple
          N Threshold, a1, b1, a2, b2
-     """
-    return 2.0E+07, 730., -0.20, 430., -0.17
+    """
+    return 2.0e07, 730.0, -0.20, 430.0, -0.17
 
 
 def _sbd(a, b, N) -> float:
@@ -438,30 +476,36 @@ def _qreg_fit_coeffs(q):
     from sklearn.linear_model import QuantileRegressor
     from dohl.config import _FatigueData
 
-    if q < 0. or q > 1:
+    if q < 0.0 or q > 1:
         raise ValueError()
-    qs = min(q, 1. - q)
+    qs = min(q, 1.0 - q)
 
     df = _FatigueData.qreg_input()
-    inputs = ['ten_rat', 'yad_log', 'ybga', 'ka']
-    output = ['logN']
+    inputs = ["ten_rat", "yad_log", "ybga", "ka"]
+    output = ["logN"]
     x = df[inputs].values
     y = df[output].values.ravel()
 
-    m1 = QuantileRegressor(quantile=qs, alpha=0.0, solver='highs', fit_intercept=True)
+    m1 = QuantileRegressor(quantile=qs, alpha=0.0, solver="highs", fit_intercept=True)
     m1.fit(x, y)
     c1 = (m1.intercept_,) + tuple(m1.coef_)
 
-    qc = 1. - qs
-    m2 = QuantileRegressor(quantile=qc, alpha=0.0, solver='highs', fit_intercept=True)
+    qc = 1.0 - qs
+    m2 = QuantileRegressor(quantile=qc, alpha=0.0, solver="highs", fit_intercept=True)
     m2.fit(x, y)
     c2 = (m2.intercept_,) + tuple(m2.coef_)
 
     return c1, c2
 
 
-def num_cycles_qreg_said(ratio: np.ndarray, yad: np.ndarray, ybga: np.ndarray, ka: np.ndarray,
-                         q: float = 0.025, log: bool = False) -> tuple:
+def num_cycles_qreg_said(
+    ratio: np.ndarray,
+    yad: np.ndarray,
+    ybga: np.ndarray,
+    ka: np.ndarray,
+    q: float = 0.025,
+    log: bool = False,
+) -> tuple:
     # TODO : doc
     """...
 
