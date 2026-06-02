@@ -1,134 +1,93 @@
 # Damage in Overhead Lines
 
-_**dohl**_ is a python package proposed to evaluate damage in overhead lines.
+[![ci](https://github.com/rte-france/pallas-dohl/actions/workflows/ci.yml/badge.svg)](https://github.com/rte-france/pallas-dohl/actions/workflows/ci.yml)
+![python](https://img.shields.io/badge/python-3.10%2B-blue)
+![license](https://img.shields.io/badge/license-MPL--2.0-green)
+
+_**dohl**_ is a python package to evaluate fatigue damage in overhead transmission lines from aeolian vibration. It implements established methods from the EPRI "Orange Book" and CIGRE (safe-border-line, fictive stress, energy balance principle, Stockbridge dampers, Weibull-integrated lifespan).
 
 ## Table of contents
 
 * [Installation](#installation)
 * [Basic usage](#basic-usage)
+* [Testing](#testing)
 * [Building the documentation](#building-the-documentation)
 
 ## Installation
 
-To install the package using pip, execute the following command :
+Install from GitHub:
 
-```shell script
+```shell
 python -m pip install git+https://github.com/rte-france/pallas-dohl
 ```
 
-Or by downloading the package and executing in the repo :
+Or from a local clone:
 
-```shell script
+```shell
 python -m pip install .
 ```
 
-Two scripts (for linux & windows) are also available at project root to build an environment using the `uv` package manager.
+Two helper scripts (`create_uvenv` for linux, `create_uvenv.ps1` for windows) at project root build a development environment with the `uv` package manager.
 
 ## Basic usage
 
-### Calculate amplitude of vibrations based on CIGRE model
+Estimate annual fatigue damage of an Aster 570 conductor across a range of wind speeds:
 
-```python script
+```python
 import numpy as np
-from dohl import damage as dmg
-
-
-def _aster570_data():
-    m = 1.571
-    D = 3.105E-02
-    rts = 1.853E+05
-    EImin = 2.828E+01
-    EImax = 2.155E+03
-    alpha = 0.140652249164
-    young = 6.8E+10
-    d = 3.45E-03
-    ml = False
-    return m, D, rts, EImin, EImax, alpha, young, d, ml
-
-
-# Get your conductor data
-m, D, rts, EImin, EImax, alpha, _, _, _ = _aster570_data()
-
-# Define your abscissa where to evaluate amplitude
-x = np.linspace(0, 0.2, 21)
-
-# Define a frequency of vibration
-f = np.array([10])
-
-# Calculate your tension using rts and a ratio
-ratio = np.array([0.15])
-t = ratio * rts
-
-# Define an antinode vibration amplitude
-ymax = 1.0e-3 * np.ones_like(f)
-
-# Calculations based on a beam vibration model, from CIGRE with minimal tangential bending stiffness of the cable (EImin)
-a = dmg._ampl_cigre(ymax, f, t, m, EImin, x)
-```
-
-### Calculate damage
-
-```python script
-import numpy as np
-from dohl import damage as dmg
 from dohl.lifespan import damage_year
 
+# Aster 570 conductor data
+mu, D, d = 1.571, 3.105e-2, 3.45e-3        # lineic mass (kg/m), external diameter (m), last-layer strand diameter (m)
+rts = 1.853e5                              # rated tensile strength (N)
+EImin, EImax = 28.28, 2155.0               # bending stiffness range (N.m**2)
+young = 6.8e10                             # Young's modulus (Pa)
+alpha = 0.140652                           # tension-to-curvature coefficient
 
-def _aster570_data():
-    m = 1.571
-    D = 3.105E-02
-    rts = 1.853E+05
-    EImin = 2.828E+01
-    EImax = 2.155E+03
-    alpha = 0.140652249164
-    young = 6.8E+10
-    d = 3.45E-03
-    ml = False
-    return m, D, rts, EImin, EImax, alpha, young, d, ml
+# Wind speeds (m/s) and span tension (arbitrary 15% of RTS)
+u = np.linspace(0.5, 5.0, 10)
+H = 0.15 * rts * np.ones_like(u)
 
+ymax, yb, sigma, dmg = damage_year(
+    u, H, D, d, mu, young, EImin, EImax,
+    multilayer=False,
+    rts=rts,
+    x0=alpha * H / rts,
+)
 
-# Get your conductor data
-mu, D, rts, EImin, EImax, alpha, young, d, ml = _aster570_data()
-
-# Generate your wind
-u = np.linspace(0, 5, 21)[1:]
-
-# Calculate your tension using rts and a ratio
-ratio = np.array([0.15])
-h = ratio * rts
-
-# Set your damping method
-dm = 'olla_approx'
-
-# Set your fictive stress method
-fsm = 'fymax'
-
-# Set bending stiffness to use
-fsba = 'min'
-
-# Calculate your curvature
-x0 = alpha * h / rts
-
-# Calculate your damage
-ym, yb, sg, ls = damage_year(u, h, D, d, mu, young, EImin, EImax,
-                             wind_method='cigre', damping_method=dm,
-                             fictive_stress_method=fsm, fsba=fsba,
-                             multilayer=ml, rts=rts, x0=x0)
-
+print("annual damage per wind speed:", dmg)
 ```
+
+## Testing
+
+The test suite is in `tests/` and runs with pytest:
+
+```shell
+uv sync --group test
+uv run pytest --cov=dohl
+```
+
+Current state (61 tests, 1.0s runtime):
+
+| Module                                          | Coverage |
+| ----------------------------------------------- | -------- |
+| `dohl/stockbridge.py`                           | 100%     |
+| `dohl/config.py`                                | 97%      |
+| `dohl/ebp.py`                                   | 89%      |
+| `dohl/lifespan.py`                              | 86%      |
+| `dohl/damage.py`                                | 75%      |
+| **Total** (excluding `_fatigue_model_input.py`) | **~88%** |
+
+The internal `_fatigue_model_input.py` depends on the `strdcable` package which is not a runtime dependency, so it is excluded from coverage targets.
+
+Continuous integration runs the suite on Ubuntu, Windows and macOS for Python 3.10, 3.11 and 3.12, plus a lint job (`ruff check`, `ruff format --check`, `mypy` advisory). See `.github/workflows/ci.yml`.
 
 ## Building the documentation
 
-Make sure you have sphinx and the Readthedocs theme installed:
+Install the doc dependency group, then build:
 
-```shell script
-pip install sphinx
-pip install sphinx_rtd_theme
-```
-
-Go to the doc directory and build:
-
-```shell script
+```shell
+uv sync --group doc
 cd doc
 make html
 ```
