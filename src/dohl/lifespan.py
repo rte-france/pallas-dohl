@@ -1,22 +1,33 @@
-# !/usr/bin/env python3
-# -*- coding: utf-8 -*-
 import numpy as np
 import scipy.stats
 
-from dohl import damage
-from dohl import ebp
+from dohl import damage, ebp
 
-_wind_speed_min = 0.
-_wind_speed_max = 15.
+_wind_speed_min = 0.0
+_wind_speed_max = 15.0
 _wind_speed_num = 150
 
 
-def damage_year(wind_speed: np.ndarray, tension: np.ndarray, external_diameter: np.ndarray,
-                last_strand_diameter: np.ndarray, lineic_mass: np.ndarray, young: np.ndarray,
-                EImin: np.ndarray, EImax: np.ndarray, multilayer: bool = True,
-                strouhal: float = 0.2, wind_method: str = 'cigre', damping_method: str = 'foti',
-                iv: float = 0., fictive_stress_method: str = 'ba_pfs', fsba: str = 'avg',
-                rts: np.ndarray = None, x0: np.ndarray = None, stockbridge_cfg: dict = {}) -> tuple:
+def damage_year(
+    wind_speed: np.ndarray,
+    tension: np.ndarray,
+    external_diameter: np.ndarray,
+    last_strand_diameter: np.ndarray,
+    lineic_mass: np.ndarray,
+    young: np.ndarray,
+    EImin: np.ndarray,
+    EImax: np.ndarray,
+    multilayer: bool = True,
+    strouhal: float = 0.2,
+    wind_method: str = "cigre",
+    damping_method: str = "foti",
+    iv: float = 0.0,
+    fictive_stress_method: str = "ba_pfs",
+    fsba: str = "avg",
+    rts: np.ndarray = None,
+    x0: np.ndarray = None,
+    stockbridge_cfg: dict | None = None,
+) -> tuple:
     """Estimate sustained damage in a year.
 
     Combining vibrations amplitudes using Energy Balance Principle from
@@ -82,33 +93,68 @@ def damage_year(wind_speed: np.ndarray, tension: np.ndarray, external_diameter: 
     d = last_strand_diameter
     mu = lineic_mass
 
-    if fsba == 'min':
+    if fsba == "min":
         ei = EImin
-    elif fsba == 'max':
+    elif fsba == "max":
         ei = EImax
-    elif fsba == 'avg':
+    elif fsba == "avg":
         ei = 0.5 * (EImin + EImax)
     else:
-        raise ValueError('')
+        raise ValueError("")
 
     freq = u * strouhal / D
-    ymax = ebp.ymax(freq, tension, D, wind_method=wind_method, damping_method=damping_method, iv=iv,
-                    mu=mu, rts=rts, EImin=EImin, EImax=EImax, x0=x0, stockbridge_cfg=stockbridge_cfg)
-    sigma, yb = damage.fictive_stress(ymax, freq, tension, d, mu, young, ei, method=fictive_stress_method,
-                                      return_yb=True)
-    nbcyc = damage.inv_safe_border_line(1.0E-06 * sigma, multilayer)
+    ymax = ebp.ymax(
+        freq,
+        tension,
+        D,
+        wind_method=wind_method,
+        damping_method=damping_method,
+        iv=iv,
+        mu=mu,
+        rts=rts,
+        EImin=EImin,
+        EImax=EImax,
+        x0=x0,
+        stockbridge_cfg=stockbridge_cfg,
+    )
+    sigma, yb = damage.fictive_stress(
+        ymax,
+        freq,
+        tension,
+        d,
+        mu,
+        young,
+        ei,
+        method=fictive_stress_method,
+        return_yb=True,
+    )
+    nbcyc = damage.inv_safe_border_line(1.0e-06 * sigma, multilayer)
     dmg = 365.25 * 24 * 3600 * freq / nbcyc
 
     return ymax, yb, sigma, dmg
 
 
-def damage_history(time: np.ndarray, wind_speed: np.ndarray, tension: np.ndarray,
-                   external_diameter: np.ndarray, last_strand_diameter: np.ndarray,
-                   lineic_mass: np.ndarray, young: np.ndarray, EImin: np.ndarray, EImax: np.ndarray,
-                   multilayer: bool = True, strouhal: float = 0.2, wind_method: str = 'cigre',
-                   damping_method: str = 'foti', iv: float = 0.,
-                   fictive_stress_method: str = 'ba_pfs', fsba: str = 'avg', rts: np.ndarray = None,
-                   beta: np.ndarray = None, stockbridge_cfg={}) -> tuple:
+def damage_history(
+    time: np.ndarray,
+    wind_speed: np.ndarray,
+    tension: np.ndarray,
+    external_diameter: np.ndarray,
+    last_strand_diameter: np.ndarray,
+    lineic_mass: np.ndarray,
+    young: np.ndarray,
+    EImin: np.ndarray,
+    EImax: np.ndarray,
+    multilayer: bool = True,
+    strouhal: float = 0.2,
+    wind_method: str = "cigre",
+    damping_method: str = "foti",
+    iv: float = 0.0,
+    fictive_stress_method: str = "ba_pfs",
+    fsba: str = "avg",
+    rts: np.ndarray = None,
+    beta: np.ndarray = None,
+    stockbridge_cfg: dict | None = None,
+) -> tuple:
     """Estimate sustained damage over a time-period.
 
     Combining vibrations amplitudes using Energy Balance Principle from
@@ -177,10 +223,31 @@ def damage_history(time: np.ndarray, wind_speed: np.ndarray, tension: np.ndarray
     dmg = np.zeros_like(time)
     for i in range(len(time)):
         # compute damage per year
-        _, _, _, tmp, = damage_year(u[i], tension[i], D, d, mu, young, EImin, EImax, multilayer=multilayer,
-                                    strouhal=strouhal, wind_method=wind_method, damping_method=damping_method, iv=iv,
-                                    fictive_stress_method=fictive_stress_method, fsba=fsba, rts=rts,
-                                    x0=beta * tension[i], stockbridge_cfg=stockbridge_cfg)
+        (
+            _,
+            _,
+            _,
+            tmp,
+        ) = damage_year(
+            u[i],
+            tension[i],
+            D,
+            d,
+            mu,
+            young,
+            EImin,
+            EImax,
+            multilayer=multilayer,
+            strouhal=strouhal,
+            wind_method=wind_method,
+            damping_method=damping_method,
+            iv=iv,
+            fictive_stress_method=fictive_stress_method,
+            fsba=fsba,
+            rts=rts,
+            x0=beta * tension[i],
+            stockbridge_cfg=stockbridge_cfg,
+        )
         # back in damage per second
         dmg[i] = tmp / (365.25 * 24 * 3600)
 
@@ -188,13 +255,27 @@ def damage_history(time: np.ndarray, wind_speed: np.ndarray, tension: np.ndarray
     return 0.5 * np.sum((dmg[1:] + dmg[:-1]) * np.diff(time))
 
 
-def damage_year_weibull(shape: float, scale: float, tension: np.ndarray,
-                        external_diameter: np.ndarray, last_strand_diameter: np.ndarray,
-                        lineic_mass: np.ndarray, young: float, EImin: float, EImax: float,
-                        multilayer: str = True, strouhal: float = 0.2, wind_method: str = 'cigre',
-                        damping_method: str = 'foti', iv: float = 0.,
-                        fictive_stress_method: str = 'ba_pfs', fsba: str = 'avg', rts: float = None,
-                        x0: float = None, stockbridge_cfg: dict = {}) -> float:
+def damage_year_weibull(
+    shape: float,
+    scale: float,
+    tension: np.ndarray,
+    external_diameter: np.ndarray,
+    last_strand_diameter: np.ndarray,
+    lineic_mass: np.ndarray,
+    young: float,
+    EImin: float,
+    EImax: float,
+    multilayer: str = True,
+    strouhal: float = 0.2,
+    wind_method: str = "cigre",
+    damping_method: str = "foti",
+    iv: float = 0.0,
+    fictive_stress_method: str = "ba_pfs",
+    fsba: str = "avg",
+    rts: float = None,
+    x0: float = None,
+    stockbridge_cfg: dict | None = None,
+) -> float:
     """Sustained damage of a cable with wind history as a Weibull distribution.
 
     Using the damage computation function, an integration is performed over
@@ -257,25 +338,54 @@ def damage_year_weibull(shape: float, scale: float, tension: np.ndarray,
     # wind speed discretization
     u = np.linspace(_wind_speed_min, _wind_speed_max, _wind_speed_num + 1)[1:]
     # compute damage for wind speeds
-    _, _, _, dmg = damage_year(u, tension, D, d, mu, young, EImin, EImax, multilayer=multilayer, strouhal=strouhal,
-                               wind_method=wind_method, damping_method=damping_method, iv=iv,
-                               fictive_stress_method=fictive_stress_method, fsba=fsba, rts=rts, x0=x0,
-                               stockbridge_cfg=stockbridge_cfg)
+    _, _, _, dmg = damage_year(
+        u,
+        tension,
+        D,
+        d,
+        mu,
+        young,
+        EImin,
+        EImax,
+        multilayer=multilayer,
+        strouhal=strouhal,
+        wind_method=wind_method,
+        damping_method=damping_method,
+        iv=iv,
+        fictive_stress_method=fictive_stress_method,
+        fsba=fsba,
+        rts=rts,
+        x0=x0,
+        stockbridge_cfg=stockbridge_cfg,
+    )
     # wind distributions
-    p = scipy.stats.exponweib.pdf(u, 1., shape, 0., scale)
+    p = scipy.stats.exponweib.pdf(u, 1.0, shape, 0.0, scale)
     # integrate damage over distribution (cumulative damage using miner's law)
     dmg *= p
     return np.sum(0.5 * (dmg[1:] + dmg[:-1]) * np.diff(u))
 
 
-def damage_year_weibull_array(shape: np.ndarray, scale: np.ndarray, tension: np.ndarray,
-                              external_diameter: np.ndarray, last_strand_diameter: np.ndarray,
-                              lineic_mass: np.ndarray, young: np.ndarray, EImin: np.ndarray,
-                              EImax: np.ndarray, multilayer: bool = True, strouhal: float = 0.2,
-                              wind_method: str = 'cigre', damping_method: str = 'foti',
-                              iv: float = 0., fictive_stress_method: str = 'ba_pfs',
-                              fsba: str = 'avg', rts: np.ndarray = None,
-                              x0: np.ndarray = None, stockbridge_cfg: dict = {}) -> np.ndarray:
+def damage_year_weibull_array(
+    shape: np.ndarray,
+    scale: np.ndarray,
+    tension: np.ndarray,
+    external_diameter: np.ndarray,
+    last_strand_diameter: np.ndarray,
+    lineic_mass: np.ndarray,
+    young: np.ndarray,
+    EImin: np.ndarray,
+    EImax: np.ndarray,
+    multilayer: bool = True,
+    strouhal: float = 0.2,
+    wind_method: str = "cigre",
+    damping_method: str = "foti",
+    iv: float = 0.0,
+    fictive_stress_method: str = "ba_pfs",
+    fsba: str = "avg",
+    rts: np.ndarray = None,
+    x0: np.ndarray = None,
+    stockbridge_cfg: dict | None = None,
+) -> np.ndarray:
     """Sustained damage of a cable with wind history as a Weibull distribution.
 
     Using the damage computation function, an integration is performed over
@@ -342,20 +452,36 @@ def damage_year_weibull_array(shape: np.ndarray, scale: np.ndarray, tension: np.
     for x in l:
         try:
             n = max(n, len(x))
-        except:
+        except TypeError:
             pass
 
     # if no array, use std function
     if n == 1:
-        return damage_year_weibull(shape, scale, tension, D, d, mu, young, EImin, EImax,
-                                   multilayer=multilayer, strouhal=strouhal,
-                                   wind_method=wind_method, damping_method=damping_method, iv=iv,
-                                   fictive_stress_method=fictive_stress_method, fsba=fsba, rts=rts,
-                                   x0=x0, stockbridge_cfg=stockbridge_cfg)
+        return damage_year_weibull(
+            shape,
+            scale,
+            tension,
+            D,
+            d,
+            mu,
+            young,
+            EImin,
+            EImax,
+            multilayer=multilayer,
+            strouhal=strouhal,
+            wind_method=wind_method,
+            damping_method=damping_method,
+            iv=iv,
+            fictive_stress_method=fictive_stress_method,
+            fsba=fsba,
+            rts=rts,
+            x0=x0,
+            stockbridge_cfg=stockbridge_cfg,
+        )
 
-    # ...
+    # broadcast every input to shape (n,); non-in-place so bool arrays are not rejected
     for i in range(len(l)):
-        l[i] *= np.ones(n)
+        l[i] = l[i] * np.ones(n)
     shape, scale, tension, D, d, mu, young, EImin, EImax, multilayer, rts, x0 = tuple(l)
     multilayer = multilayer.astype(bool)
     u = np.linspace(_wind_speed_min, _wind_speed_max, _wind_speed_num + 1)[1:]
@@ -364,24 +490,55 @@ def damage_year_weibull_array(shape: np.ndarray, scale: np.ndarray, tension: np.
     if n < len(u):
         dmg = np.zeros(n)
         for i in range(n):
-            dmg[i] = damage_year_weibull(shape[i], scale[i], tension[i], D[i], d[i], mu[i],
-                                         young[i], EImin[i], EImax[i], multilayer=multilayer[i],
-                                         strouhal=strouhal, wind_method=wind_method,
-                                         damping_method=damping_method, iv=iv,
-                                         fictive_stress_method=fictive_stress_method, fsba=fsba,
-                                         rts=rts[i], x0=x0[i], stockbridge_cfg=stockbridge_cfg)
+            dmg[i] = damage_year_weibull(
+                shape[i],
+                scale[i],
+                tension[i],
+                D[i],
+                d[i],
+                mu[i],
+                young[i],
+                EImin[i],
+                EImax[i],
+                multilayer=multilayer[i],
+                strouhal=strouhal,
+                wind_method=wind_method,
+                damping_method=damping_method,
+                iv=iv,
+                fictive_stress_method=fictive_stress_method,
+                fsba=fsba,
+                rts=rts[i],
+                x0=x0[i],
+                stockbridge_cfg=stockbridge_cfg,
+            )
         return dmg
 
     # large array: loop on wind speed items
     p = np.zeros((n, len(u)))
     for i in range(n):
-        p[i, :] = scipy.stats.exponweib.pdf(u, 1., shape[i], 0., scale[i])
+        p[i, :] = scipy.stats.exponweib.pdf(u, 1.0, shape[i], 0.0, scale[i])
 
     dmg = np.zeros_like(p)
     for j in range(len(u)):
-        _, _, _, dmg[:, j] = damage_year(u[j], tension, D, d, mu, young, EImin, EImax, multilayer=multilayer,
-                                         strouhal=strouhal, wind_method=wind_method, damping_method=damping_method,
-                                         iv=iv, fictive_stress_method=fictive_stress_method, fsba=fsba, rts=rts, x0=x0,
-                                         stockbridge_cfg=stockbridge_cfg)
+        _, _, _, dmg[:, j] = damage_year(
+            u[j],
+            tension,
+            D,
+            d,
+            mu,
+            young,
+            EImin,
+            EImax,
+            multilayer=multilayer,
+            strouhal=strouhal,
+            wind_method=wind_method,
+            damping_method=damping_method,
+            iv=iv,
+            fictive_stress_method=fictive_stress_method,
+            fsba=fsba,
+            rts=rts,
+            x0=x0,
+            stockbridge_cfg=stockbridge_cfg,
+        )
     dmg *= p
     return np.sum(0.5 * (dmg[:, 1:] + dmg[:, :-1]) * np.diff(u), axis=1)

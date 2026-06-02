@@ -1,0 +1,53 @@
+#!/bin/bash
+set -euo pipefail
+# set -x
+
+DEF_NAME=pallas-dohl-uv
+
+# PYTHON_VERSION="--python-preference=system"
+PYTHON_VERSION="--python 3.12"
+# PYTHON_VERSION="--python 3.13"
+# PYTHON_VERSION="--python 3.14"
+# PYTHON_VERSION="--python 3.15"
+
+# -----------------------------------------------------------------------------
+
+# -- dir for all envs
+ENV_DIR=${ENV_DIR:-$HOME/ENV}
+mkdir -p $ENV_DIR
+
+# -- check uv install, update if necessary
+if ! command -v uv &> /dev/null; then
+    echo "uv not found; installing ..."
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    source $HOME/.cargo/env
+else
+    # uv self update
+    echo "uv already installed ($(uv --version))"
+fi
+
+# -- current env with link
+VENV=${ENV_DIR}/${DEF_NAME}
+VLNK=.uvenv
+ln -sf $VENV $VLNK
+uv venv --clear $VENV ${PYTHON_VERSION}
+source $VENV/bin/activate
+
+# -- upgrade pip
+uv pip install --upgrade pip
+
+## -- install requirements
+#uv pip compile requirements.in --exclude-newer 2026-06-01 > requirements.txt
+#uv pip install -r requirements.txt
+
+## -- install local package
+rm -rf build
+uv sync --group dev
+
+# -- end text
+echo "---"
+echo -e "\e[1mto start the environment, type :\e[0m"
+echo "source ${VENV}/bin/activate"
+echo ""
+echo -e "\e[1mto stop the environment, type :\e[0m"
+echo "deactivate"
