@@ -5,11 +5,12 @@ import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from scipy.stats import kendalltau
+
 from dohl import damage as dmg
 from dohl import ebp
 from dohl.lifespan import damage_year, damage_year_weibull, damage_year_weibull_array
 from dohl.stockbridge import impedance, power_foti, power_wolf
-from scipy.stats import kendalltau
 
 _datadir = os.path.join("examples", "data")
 
@@ -99,9 +100,7 @@ def test_wind_power():
     for k, key in enumerate(dat):
         elm = dat[key]
         for j in range(2):
-            ax[0, j].plot(
-                elm["ampl"], elm["power"], "o", c="C%d" % (k,), label=elm["label"]
-            )
+            ax[0, j].plot(elm["ampl"], elm["power"], "o", c="C%d" % (k,), label=elm["label"])
         x = np.linspace(elm["range"][0], elm["range"][1], 101)
         y = ebp.wind_power_adim(x, method=key)
         ax[0, 1].plot(x, y, "--", c="C%d" % (k,))
@@ -342,9 +341,7 @@ def test_fictive_stress():
     for k, mt in enumerate(dmg._fictive_stress_methods()):
         ax[0, 0].plot(np.nan, np.nan, marker=["s", "o", "d"][k], c="gray", label=mt)
     for l, ei in enumerate(EI):
-        ax[0, 0].plot(
-            np.nan, np.nan, c="C%d" % (l,), label=["EImin", "EIavg", "EImax"][l]
-        )
+        ax[0, 0].plot(np.nan, np.nan, c="C%d" % (l,), label=["EImin", "EIavg", "EImax"][l])
     ax[0, 0].legend()
 
     return
@@ -447,9 +444,7 @@ def test_dmg():
                     ax[1, i].plot(u, sg * 1.0e-06, marker=m[k], c="C%d" % (j,), lw=1)
                     ax[1, i].grid(True)
 
-                    ax[2, i].plot(
-                        u, sg / young * 1.0e06, marker=m[k], c="C%d" % (j,), lw=1
-                    )
+                    ax[2, i].plot(u, sg / young * 1.0e06, marker=m[k], c="C%d" % (j,), lw=1)
                     ax[2, i].grid(True)
 
                     ax[3, i].semilogy(u, ls, marker=m[k], c="C%d" % (j,), lw=1)
@@ -599,9 +594,7 @@ def test_qreg():
 
     fig, ax = plt.subplots(nrows=1, ncols=4)
     for i, q in enumerate([0.5, 0.9, 0.99]):
-        yp1, yp2 = dmg.num_cycles_qreg_said(
-            x[:, 0], x[:, 1], x[:, 2], x[:, 3], q=q, log=True
-        )
+        yp1, yp2 = dmg.num_cycles_qreg_said(x[:, 0], x[:, 1], x[:, 2], x[:, 3], q=q, log=True)
         ax[i].scatter(y, yp1, label="QReg (%.3f)" % (q,), marker=".")
         ax[i].scatter(y, yp2, label="QReg (%.3f)" % (1.0 - q,), marker=".")
         ax[i].plot(
@@ -619,7 +612,6 @@ def test_qreg():
 
 
 if __name__ == "__main__":
-
     _b = False
     if _b:
         test_wind_power()

@@ -2,10 +2,10 @@ import os
 
 import matplotlib.pyplot as plt
 import numpy as np
+
 from dohl import damage as dmg
 
 if __name__ == "__main__":
-
     # read images (screenshots from orange book)
     rep = os.path.join("examples", "data")
     im1 = plt.imread(os.path.join(rep, "fatigue_test_1_layer.png"))

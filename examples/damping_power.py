@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+
 from dohl import ebp
 
 
@@ -18,7 +19,6 @@ def _aster570_data():
 
 
 if __name__ == "__main__":
-
     # get conductor data
     m, d, rts, EImin, EImax, alpha, _, _, _ = _aster570_data()
 
