@@ -1,5 +1,3 @@
-# !/usr/bin/env python3
-# -*- coding: utf-8 -*-
 from typing import Union
 
 import numpy as np
@@ -111,9 +109,7 @@ def _ampl_cigre(
     b = np.sqrt(-q + np.sqrt(r + q**2))
     y = (
         np.sin(b * x)
-        - b
-        * (np.sin(a * x) + np.tanh(0.5 * a * w) * (np.cos(b * x) - np.cosh(a * x)))
-        / a
+        - b * (np.sin(a * x) + np.tanh(0.5 * a * w) * (np.cos(b * x) - np.cosh(a * x))) / a
     )
     return ymax * y
 

@@ -1,5 +1,3 @@
-# !/usr/bin/env python3
-# -*- coding: utf-8 -*-
 import numpy as np
 
 
@@ -97,13 +95,7 @@ def power_foti(ymax, freq, tension, L, mu, xs, z):
     bar_omega_n = mode_n * np.pi
 
     alphad = xs / L
-    p = (
-        0.5
-        * np.real(z)
-        * np.sin(bar_omega_n * (1.0 - alphad)) ** 2
-        * omega_n**2
-        * ymax**2
-    )
+    p = 0.5 * np.real(z) * np.sin(bar_omega_n * (1.0 - alphad)) ** 2 * omega_n**2 * ymax**2
 
     return p
 
@@ -133,16 +125,7 @@ def power_wolf(ymax, freq, tension, d, mu, xs, z):
     g = (np.sin(b) ** 2 * np.cos(2 * b) + gm**2 + gm * np.sin(2 * b) * np.sin(a)) / (
         np.sin(b) ** 2 + gm**2 + 2 * gm * np.sin(b) * np.sin(b + a)
     )
-    p = (
-        0.25
-        * tension
-        * C
-        * k**2
-        * d**2
-        * (ymax / d) ** 2
-        * (1 - h**2 - g**2)
-        / (1 + h**2 + g**2)
-    )
+    p = 0.25 * tension * C * k**2 * d**2 * (ymax / d) ** 2 * (1 - h**2 - g**2) / (1 + h**2 + g**2)
 
     return np.abs(p)
 

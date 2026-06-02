@@ -1,7 +1,3 @@
-# !/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
-
 import numpy as np
 from dohl.config import _EpriData
 from dohl.stockbridge import power
@@ -212,11 +208,7 @@ def damping_power_foti(
 
     def G1(kn):
         # eq (29)
-        return (
-            1.0 / 3.0
-            - 0.375 * np.cos(2.0 * np.pi * kn)
-            + 1.0 / 24.0 * np.cos(6.0 * np.pi * kn)
-        )
+        return 1.0 / 3.0 - 0.375 * np.cos(2.0 * np.pi * kn) + 1.0 / 24.0 * np.cos(6.0 * np.pi * kn)
 
     def G2(kn):
         # eq (30)
@@ -463,32 +455,22 @@ def damping_power(
     """
     if method == "foti":
         if mu is None or EImax is None or x0 is None:
-            raise ValueError(
-                "Args mu, EImax and x0 must be specified when using foti method"
-            )
+            raise ValueError("Args mu, EImax and x0 must be specified when using foti method")
         return damping_power_foti(ymax, freq, tension, mu, EImax, x0)
     elif method == "noiseux1992":
         if d is None or mu is None or rts is None:
-            raise ValueError(
-                "Args d and mu must be specified when using noiseux1992 method"
-            )
+            raise ValueError("Args d and mu must be specified when using noiseux1992 method")
         return damping_power_noiseux1992(ymax, freq, tension, d, mu)
     elif method == "olla":
         if mu is None or EImin is None or EImax is None or x0 is None:
             raise ValueError(
                 "Args mu, EImin, EImax and x0 must be specified when using olla method"
             )
-        return damping_power_cieren(
-            ymax, freq, tension, mu, EImin, EImax, x0, approx=False
-        )
+        return damping_power_cieren(ymax, freq, tension, mu, EImin, EImax, x0, approx=False)
     elif method == "olla_approx":
         if mu is None or EImax is None or x0 is None:
-            raise ValueError(
-                "Args mu, EImax and x0 must be specified when using olla method"
-            )
-        return damping_power_cieren(
-            ymax, freq, tension, mu, EImin, EImax, x0, approx=True
-        )
+            raise ValueError("Args mu, EImax and x0 must be specified when using olla method")
+        return damping_power_cieren(ymax, freq, tension, mu, EImin, EImax, x0, approx=True)
 
     if l is None or m is None or n is None:
         if method not in _damping_power_methods():
@@ -617,9 +599,7 @@ def ymax(
             method="foti", tension=0.0, L=1.0, d=1.0, mu=1.0, xs=0.0, fz=[], z=[]
         )
 
-    if (damping_method == "olla" and type(freq) is np.ndarray) or len(
-        stockbridge_cfg["z"]
-    ) > 0:
+    if (damping_method == "olla" and type(freq) is np.ndarray) or len(stockbridge_cfg["z"]) > 0:
 
         def fun(y):
             wp = wind_power(y, freq, d, iv=iv, method=wind_method)
