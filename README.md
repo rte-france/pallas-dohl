@@ -10,8 +10,6 @@ _**dohl**_ is a python package proposed to evaluate damage in overhead lines.
 
 ## Installation
 
-### Using pip
-
 To install the package using pip, execute the following command :
 
 ```shell script
@@ -24,17 +22,7 @@ Or by downloading the package and executing in the repo :
 python -m pip install .
 ```
 
-A version of python 3.8 or above is required you can create such environment using conda :
-
-```shell script
-conda create -n dohl_env python=3.8
-```
-
-To activate your environement :
-
-```shell script
-conda activate dohl_env
-```
+Two scripts (for linux & windows) are also available at project root to build an environment using the `uv` package manager.
 
 ## Basic usage
 
@@ -146,6 +134,5 @@ The documentation can then be accessed from `doc/build/html/index.html`.
 
 ## Acknowledgements
 
-_**dohl**_ is developed by [Eurobios](http://www.eurobios.com/) and supported by [Rte-R&D](https://www.rte-france.com/)
-_via_ the OLLA project (
-see [ResearchGate](https://www.researchgate.net/project/OLLA-overhead-lines-lifespan-assessment)).
+_**dohl**_ is developed by [Mews Labs](https://www.mews-labs.com) (formerly _Eurobios_) and supported by [Rte-R&D](https://www.rte-france.com/)
+_via_ the OLLA & PALLAS projects (see [ResearchGate](https://www.researchgate.net/project/OLLA-overhead-lines-lifespan-assessment)).
