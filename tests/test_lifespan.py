@@ -172,7 +172,7 @@ def test_damage_year_weibull_array_small(aster570):
         young=np.full(n, c["young"]),
         EImin=np.full(n, c["EImin"]),
         EImax=np.full(n, c["EImax"]),
-        multilayer=c["multilayer"],
+        multilayer=np.full(n, c["multilayer"]),
         wind_method="cigre",
         damping_method="olla_approx",
         fictive_stress_method="fymax",

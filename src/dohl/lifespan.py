@@ -1,3 +1,5 @@
+from typing import Optional
+
 import numpy as np
 import scipy.stats
 
@@ -27,7 +29,7 @@ def damage_year(
     fsba: str = "avg",
     rts: np.ndarray = None,
     x0: np.ndarray = None,
-    stockbridge_cfg: dict = {},
+    stockbridge_cfg: Optional[dict] = None,
 ) -> tuple:
     """Estimate sustained damage in a year.
 
@@ -154,7 +156,7 @@ def damage_history(
     fsba: str = "avg",
     rts: np.ndarray = None,
     beta: np.ndarray = None,
-    stockbridge_cfg={},
+    stockbridge_cfg: Optional[dict] = None,
 ) -> tuple:
     """Estimate sustained damage over a time-period.
 
@@ -275,7 +277,7 @@ def damage_year_weibull(
     fsba: str = "avg",
     rts: float = None,
     x0: float = None,
-    stockbridge_cfg: dict = {},
+    stockbridge_cfg: Optional[dict] = None,
 ) -> float:
     """Sustained damage of a cable with wind history as a Weibull distribution.
 
@@ -385,7 +387,7 @@ def damage_year_weibull_array(
     fsba: str = "avg",
     rts: np.ndarray = None,
     x0: np.ndarray = None,
-    stockbridge_cfg: dict = {},
+    stockbridge_cfg: Optional[dict] = None,
 ) -> np.ndarray:
     """Sustained damage of a cable with wind history as a Weibull distribution.
 
@@ -453,7 +455,7 @@ def damage_year_weibull_array(
     for x in l:
         try:
             n = max(n, len(x))
-        except:
+        except TypeError:
             pass
 
     # if no array, use std function
@@ -480,9 +482,9 @@ def damage_year_weibull_array(
             stockbridge_cfg=stockbridge_cfg,
         )
 
-    # ...
+    # broadcast every input to shape (n,); non-in-place so bool arrays are not rejected
     for i in range(len(l)):
-        l[i] *= np.ones(n)
+        l[i] = l[i] * np.ones(n)
     shape, scale, tension, D, d, mu, young, EImin, EImax, multilayer, rts, x0 = tuple(l)
     multilayer = multilayer.astype(bool)
     u = np.linspace(_wind_speed_min, _wind_speed_max, _wind_speed_num + 1)[1:]

@@ -1,3 +1,5 @@
+from typing import Optional
+
 import numpy as np
 from dohl.config import _EpriData
 from dohl.stockbridge import power
@@ -119,8 +121,8 @@ def wind_power_adim(
         dat = _EpriData.wind_power()[method]
         wp = yad * np.polyval(dat["poly"][::-1], yad)
         if not extend:
-            np.where(yad < dat["range"][0], np.nan, yad)
-            np.where(yad > dat["range"][1], np.nan, yad)
+            wp = np.where(yad < dat["range"][0], np.nan, wp)
+            wp = np.where(yad > dat["range"][1], np.nan, wp)
         return wp
 
 
@@ -537,7 +539,7 @@ def ymax(
     EImin: np.ndarray = None,
     EImax: np.ndarray = None,
     x0: np.ndarray = None,
-    stockbridge_cfg: dict = {},
+    stockbridge_cfg: Optional[dict] = None,
     tol: float = 1.0e-06,
     maxiter: int = 64,
 ) -> np.ndarray:
@@ -594,7 +596,7 @@ def ymax(
     if damping_method not in _balance_damping_methods():
         raise ValueError("")
 
-    if len(stockbridge_cfg) == 0:
+    if stockbridge_cfg is None or len(stockbridge_cfg) == 0:
         stockbridge_cfg = dict(
             method="foti", tension=0.0, L=1.0, d=1.0, mu=1.0, xs=0.0, fz=[], z=[]
         )

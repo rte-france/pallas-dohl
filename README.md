@@ -46,21 +46,24 @@ def _aster570_data():
     return m, D, rts, EImin, EImax, alpha, young, d, ml
 
 
-# Get you conductor data
-m, d, rts, EImin, EImax, alpha, _, _, _ = _aster570_data()
+# Get your conductor data
+m, D, rts, EImin, EImax, alpha, _, _, _ = _aster570_data()
 
-# Define your abscisse where to evaluate amplitude
+# Define your abscissa where to evaluate amplitude
 x = np.linspace(0, 0.2, 21)
 
-# Define a frequencie of vibration
+# Define a frequency of vibration
 f = np.array([10])
 
 # Calculate your tension using rts and a ratio
 ratio = np.array([0.15])
 t = ratio * rts
 
+# Define an antinode vibration amplitude
+ymax = 1.0e-3 * np.ones_like(f)
+
 # Calculations based on a beam vibration model, from CIGRE with minimal tangential bending stiffness of the cable (EImin)
-a = dmg._ampl_cigre(d, f, t, m, EImin, x)
+a = dmg._ampl_cigre(ymax, f, t, m, EImin, x)
 ```
 
 ### Calculate damage

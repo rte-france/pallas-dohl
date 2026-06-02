@@ -52,6 +52,19 @@ def test_wind_power_adim_unknown_method_raises():
         ebp.wind_power_adim(np.array([0.1]), method="not_a_method")
 
 
+def test_wind_power_adim_extend_false_masks_out_of_range():
+    """With extend=False, yad values outside method range become NaN in the output."""
+    from dohl.config import _EpriData
+
+    dat = _EpriData.wind_power()["carroll"]
+    lo, hi = dat["range"]
+    yad = np.array([lo - 0.5 * lo, 0.5 * (lo + hi), hi + 0.5 * (hi - lo)])
+    wp = ebp.wind_power_adim(yad, method="carroll", extend=False)
+    assert np.isnan(wp[0])
+    assert np.isfinite(wp[1])
+    assert np.isnan(wp[2])
+
+
 def test_wind_power_scaling(aster570):
     """wind_power = f**3 * d**4 * wind_power_adim(y/d)."""
     c = aster570

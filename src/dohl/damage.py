@@ -369,26 +369,23 @@ def _coeffs(multilayer) -> np.ndarray:
     tuple or numpy.ndarray
         Array of poffenberger-swart stresses -- sigma_a(Yb) (MPa).
     """
-    try:
-        if multilayer:
-            n0, a1, b1, a2, b2 = _mlc()
-        else:
-            n0, a1, b1, a2, b2 = _slc()
-    except ValueError:
-        n0, a1, b1, a2, b2 = _slc()
-        n0 *= np.ones_like(multilayer)
-        a1 *= np.ones_like(multilayer)
-        b1 *= np.ones_like(multilayer)
-        a2 *= np.ones_like(multilayer)
-        b2 *= np.ones_like(multilayer)
-        ix = np.where(multilayer)[0]
-        n0_, a1_, b1_, a2_, b2_ = _mlc()
-        n0[ix] = n0_
-        a1[ix] = a1_
-        b1[ix] = b1_
-        a2[ix] = a2_
-        b2[ix] = b2_
+    if not isinstance(multilayer, np.ndarray):
+        return _mlc() if multilayer else _slc()
 
+    n0, a1, b1, a2, b2 = _slc()
+    ones = np.ones_like(multilayer, dtype=float)
+    n0 = n0 * ones
+    a1 = a1 * ones
+    b1 = b1 * ones
+    a2 = a2 * ones
+    b2 = b2 * ones
+    ix = np.where(multilayer)[0]
+    n0_, a1_, b1_, a2_, b2_ = _mlc()
+    n0[ix] = n0_
+    a1[ix] = a1_
+    b1[ix] = b1_
+    a2[ix] = a2_
+    b2[ix] = b2_
     return n0, a1, b1, a2, b2
 
 
