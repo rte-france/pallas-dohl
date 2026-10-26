@@ -125,7 +125,7 @@ def test_damping_power():
     f = np.linspace(0.0, 100, 1001)[1:]
     t = np.linspace(0.05, 0.30, 1001) * rts
     x0 = alpha * t / rts
-    dc = dict(d=d, mu=m, rts=rts, EImin=EImin, EImax=EImax)
+    conductor = ebp.Conductor(d=d, mu=m, rts=rts)
 
     mth = ebp._damping_power_methods()
     _ = mth.pop(6)
@@ -135,15 +135,18 @@ def test_damping_power():
 
     for mt in mth:
         X = y
-        Y = ebp.damping_power(X, f[ix], t[ix], method=mt, x0=x0[ix], **dc)
+        bending = ebp.Bending(EImin=EImin, EImax=EImax, x0=x0[ix])
+        Y = ebp.damping_power(X, f[ix], t[ix], conductor, bending=bending, method=mt)
         ax[0].loglog(X, Y, label=mt)
 
         X = f
-        Y = ebp.damping_power(y[ix], X, t[ix], method=mt, x0=x0[ix], **dc)
+        bending = ebp.Bending(EImin=EImin, EImax=EImax, x0=x0[ix])
+        Y = ebp.damping_power(y[ix], X, t[ix], conductor, bending=bending, method=mt)
         ax[1].loglog(X, Y, label=mt)
 
         X = t
-        Y = ebp.damping_power(y[ix], f[ix], X, method=mt, x0=x0, **dc)
+        bending = ebp.Bending(EImin=EImin, EImax=EImax, x0=x0)
+        Y = ebp.damping_power(y[ix], f[ix], X, conductor, bending=bending, method=mt)
         ax[2].loglog(X, Y, label=mt)
 
     ax[0].set_xlabel("ymax (m)")
@@ -169,14 +172,10 @@ def test_ymax_methods():
                 y = ebp.ymax(
                     f,
                     t,
+                    ebp.Conductor(d=d, mu=m, rts=rts),
+                    bending=ebp.Bending(EImin=EImin, EImax=EImax, x0=x0),
                     wind_method=wm,
                     damping_method=dm,
-                    d=d,
-                    mu=m,
-                    rts=rts,
-                    EImin=EImin,
-                    EImax=EImax,
-                    x0=x0,
                 )
                 if k == 0:
                     ax[i, j].plot(f, y / d, "-", label=wm + "/" + dm)
@@ -218,14 +217,10 @@ def test_ymax_methods_2():
             ymax = ebp.ymax(
                 f,
                 h,
+                ebp.Conductor(d=D, mu=m, rts=rts),
+                bending=ebp.Bending(EImin=EImin, EImax=EImax, x0=x0),
                 wind_method="cigre",
                 damping_method=dm,
-                d=D,
-                mu=m,
-                rts=rts,
-                EImin=EImin,
-                EImax=EImax,
-                x0=x0,
             )
             df.loc[i, dm] = ymax
 

@@ -92,10 +92,8 @@ def test_damping_power_unknown_method_raises(aster570):
             np.array([1e-3]),
             np.array([20.0]),
             np.array([0.15 * c["rts"]]),
+            ebp.Conductor(d=c["d"], mu=c["mu"], rts=c["rts"]),
             method="not_a_method",
-            d=c["d"],
-            mu=c["mu"],
-            rts=c["rts"],
         )
 
 
@@ -105,6 +103,7 @@ def test_damping_power_foti_missing_args_raises():
             np.array([1e-3]),
             np.array([20.0]),
             np.array([1e4]),
+            ebp.Conductor(),
             method="foti",
         )
 
@@ -115,6 +114,7 @@ def test_damping_power_olla_missing_args_raises():
             np.array([1e-3]),
             np.array([20.0]),
             np.array([1e4]),
+            ebp.Conductor(),
             method="olla",
         )
 
@@ -125,6 +125,7 @@ def test_damping_power_noiseux1992_missing_args_raises():
             np.array([1e-3]),
             np.array([20.0]),
             np.array([1e4]),
+            ebp.Conductor(),
             method="noiseux1992",
         )
 
@@ -176,13 +177,9 @@ def test_damping_power_increases_with_amplitude(aster570):
             ymax,
             freq,
             tension,
+            ebp.Conductor(d=c["d"], mu=c["mu"], rts=c["rts"]),
+            bending=ebp.Bending(EImin=c["EImin"], EImax=c["EImax"], x0=x0),
             method=method,
-            d=c["d"],
-            mu=c["mu"],
-            rts=c["rts"],
-            EImin=c["EImin"],
-            EImax=c["EImax"],
-            x0=x0,
         )
         assert np.all(np.diff(p) > 0), f"method {method} not monotonic"
 
@@ -196,12 +193,10 @@ def test_ymax_unknown_wind_method_raises(aster570):
         ebp.ymax(
             np.array([20.0]),
             np.array([0.15 * c["rts"]]),
-            c["D"],
+            ebp.Conductor(d=c["D"], mu=c["mu"]),
+            bending=ebp.Bending(EImax=c["EImax"], x0=np.array([c["alpha"] * 0.15])),
             wind_method="not_a_method",
             damping_method="foti",
-            mu=c["mu"],
-            EImax=c["EImax"],
-            x0=np.array([c["alpha"] * 0.15]),
         )
 
 
@@ -211,7 +206,7 @@ def test_ymax_unknown_damping_method_raises(aster570):
         ebp.ymax(
             np.array([20.0]),
             np.array([0.15 * c["rts"]]),
-            c["D"],
+            ebp.Conductor(d=c["D"]),
             wind_method="cigre",
             damping_method="not_a_method",
         )
@@ -241,12 +236,10 @@ def test_ymax_finite_for_reasonable_inputs(aster570):
     y = ebp.ymax(
         freq,
         tension,
-        c["D"],
+        ebp.Conductor(d=c["D"], mu=c["mu"]),
+        bending=ebp.Bending(EImax=c["EImax"], x0=x0),
         wind_method="cigre",
         damping_method="foti",
-        mu=c["mu"],
-        EImax=c["EImax"],
-        x0=x0,
     )
     assert y.shape == freq.shape
     # all positive and bounded by 5*D (the bisection upper bound)

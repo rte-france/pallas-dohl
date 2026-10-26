@@ -2,6 +2,7 @@ import numpy as np
 import scipy.stats
 
 from dohl import damage, ebp
+from dohl.stockbridge import StockbridgeConfig
 
 _wind_speed_min = 0.0
 _wind_speed_max = 15.0
@@ -26,7 +27,7 @@ def damage_year(
     fsba: str = "avg",
     rts: np.ndarray = None,
     x0: np.ndarray = None,
-    stockbridge_cfg: dict | None = None,
+    stockbridge: StockbridgeConfig | None = None,
 ) -> tuple:
     """Estimate sustained damage in a year.
 
@@ -73,8 +74,8 @@ def damage_year(
         Rated tensile strength of the cable (N).
     x0 : float or numpy.ndarray
         Limit curvature (m**-1).
-    stockbridge_cfg : dict
-        Stockbridge configuration. The default is {} (empty dict ie no stockbridges).
+    stockbridge : StockbridgeConfig, optional
+        Stockbridge dampers configuration. The default is no dampers.
 
     Returns
     -------
@@ -106,16 +107,12 @@ def damage_year(
     ymax = ebp.ymax(
         freq,
         tension,
-        D,
+        ebp.Conductor(d=D, mu=mu, rts=rts),
+        bending=ebp.Bending(EImin=EImin, EImax=EImax, x0=x0),
         wind_method=wind_method,
         damping_method=damping_method,
         iv=iv,
-        mu=mu,
-        rts=rts,
-        EImin=EImin,
-        EImax=EImax,
-        x0=x0,
-        stockbridge_cfg=stockbridge_cfg,
+        stockbridge=stockbridge,
     )
     sigma, yb = damage.fictive_stress(
         ymax,
@@ -153,7 +150,7 @@ def damage_history(
     fsba: str = "avg",
     rts: np.ndarray = None,
     beta: np.ndarray = None,
-    stockbridge_cfg: dict | None = None,
+    stockbridge: StockbridgeConfig | None = None,
 ) -> tuple:
     """Estimate sustained damage over a time-period.
 
@@ -202,8 +199,8 @@ def damage_history(
         Rated tensile strength of the cable (N)
     beta : float or numpy.ndarray
         Coefficient to compute limit curvature from tension (kg**-1.m**-2.s**2).
-    stockbridge_cfg : dict
-        Stockbridge configuration. The default is {} (empty dict ie no stockbridges).
+    stockbridge : StockbridgeConfig, optional
+        Stockbridge dampers configuration. The default is no dampers.
 
     Returns
     -------
@@ -246,7 +243,7 @@ def damage_history(
             fsba=fsba,
             rts=rts,
             x0=beta * tension[i],
-            stockbridge_cfg=stockbridge_cfg,
+            stockbridge=stockbridge,
         )
         # back in damage per second
         dmg[i] = tmp / (365.25 * 24 * 3600)
@@ -274,7 +271,7 @@ def damage_year_weibull(
     fsba: str = "avg",
     rts: float = None,
     x0: float = None,
-    stockbridge_cfg: dict | None = None,
+    stockbridge: StockbridgeConfig | None = None,
 ) -> float:
     """Sustained damage of a cable with wind history as a Weibull distribution.
 
@@ -322,8 +319,8 @@ def damage_year_weibull(
         Rated tensile strength of the cable (N)
     x0 : float
         Limit curvature (m**-1).
-    stockbridge_cfg : dict
-        Stockbridge configuration. The default is {} (empty dict ie no stockbridges).
+    stockbridge : StockbridgeConfig, optional
+        Stockbridge dampers configuration. The default is no dampers.
 
     Returns
     -------
@@ -356,7 +353,7 @@ def damage_year_weibull(
         fsba=fsba,
         rts=rts,
         x0=x0,
-        stockbridge_cfg=stockbridge_cfg,
+        stockbridge=stockbridge,
     )
     # wind distributions
     p = scipy.stats.exponweib.pdf(u, 1.0, shape, 0.0, scale)
@@ -384,7 +381,7 @@ def damage_year_weibull_array(
     fsba: str = "avg",
     rts: np.ndarray = None,
     x0: np.ndarray = None,
-    stockbridge_cfg: dict | None = None,
+    stockbridge: StockbridgeConfig | None = None,
 ) -> np.ndarray:
     """Sustained damage of a cable with wind history as a Weibull distribution.
 
@@ -432,8 +429,8 @@ def damage_year_weibull_array(
         Rated tensile strength of the cable (N)
     x0 : float or numpy.ndarray
         Limit curvature (m**-1).
-    stockbridge_cfg : dict
-        Stockbridge configuration. The default is {} (empty dict ie no stockbridges).
+    stockbridge : StockbridgeConfig, optional
+        Stockbridge dampers configuration. The default is no dampers.
 
     Returns
     -------
@@ -476,7 +473,7 @@ def damage_year_weibull_array(
             fsba=fsba,
             rts=rts,
             x0=x0,
-            stockbridge_cfg=stockbridge_cfg,
+            stockbridge=stockbridge,
         )
 
     # broadcast every input to shape (n,); non-in-place so bool arrays are not rejected
@@ -509,7 +506,7 @@ def damage_year_weibull_array(
                 fsba=fsba,
                 rts=rts[i],
                 x0=x0[i],
-                stockbridge_cfg=stockbridge_cfg,
+                stockbridge=stockbridge,
             )
         return dmg
 
@@ -538,7 +535,7 @@ def damage_year_weibull_array(
             fsba=fsba,
             rts=rts,
             x0=x0,
-            stockbridge_cfg=stockbridge_cfg,
+            stockbridge=stockbridge,
         )
     dmg *= p
     return np.sum(0.5 * (dmg[:, 1:] + dmg[:, :-1]) * np.diff(u), axis=1)

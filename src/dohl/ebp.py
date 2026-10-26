@@ -1,8 +1,93 @@
+from dataclasses import dataclass
+
 import numpy as np
 from scipy.optimize import bisect
 
 from dohl.config import _EpriData
-from dohl.stockbridge import power
+from dohl.stockbridge import StockbridgeConfig, power
+
+
+@dataclass
+class Conductor:
+    """Intrinsic physical properties of the conductor type.
+
+    These do not depend on the mechanical tension. Each damping method only
+    consumes the subset it needs, so all fields are optional; a method raises
+    if one it requires is left as None.
+
+    Attributes
+    ----------
+    d : float or numpy.ndarray
+        Cable external diameter (m).
+    mu : float or numpy.ndarray
+        Lineic mass of the cable (kg.m**-1).
+    rts : float or numpy.ndarray
+        Rated tensile strength of the cable (N).
+    """
+
+    d: float | np.ndarray | None = None
+    mu: float | np.ndarray | None = None
+    rts: float | np.ndarray | None = None
+
+
+@dataclass
+class Bending:
+    """Flexural quantities of the cable, which may depend on tension.
+
+    Attributes
+    ----------
+    EImin : float or numpy.ndarray
+        Minimal tangential bending stiffness of the cable (N.m**2).
+    EImax : float or numpy.ndarray
+        Maximal tangential bending stiffness of the cable (N.m**2).
+    x0 : float or numpy.ndarray
+        Limit curvature (m**-1).
+    """
+
+    EImin: float | np.ndarray | None = None
+    EImax: float | np.ndarray | None = None
+    x0: float | np.ndarray | None = None
+
+
+@dataclass
+class DampingCoeffs:
+    """Empirical coefficients for the k*ymax**l*freq**m/tension**n damping law.
+
+    Used only by the empirical damping family. When not provided, l, m, n are
+    looked up from the EPRI table and k is derived from the conductor (Lilien).
+
+    Attributes
+    ----------
+    k : float or numpy.ndarray
+        Coefficient.
+    l : float or numpy.ndarray
+        Exponent for ymax.
+    m : float or numpy.ndarray
+        Exponent for freq.
+    n : float or numpy.ndarray
+        Exponent for 1/tension.
+    """
+
+    k: float | np.ndarray | None = None
+    l: float | np.ndarray | None = None
+    m: float | np.ndarray | None = None
+    n: float | np.ndarray | None = None
+
+
+@dataclass
+class SolverConfig:
+    """Convergence parameters for the bisection solver.
+
+    Attributes
+    ----------
+    tol : float
+        Tolerance on the error. Default is 1.0e-06.
+    maxiter : int
+        Maximum number of iterations. Default is 64.
+    """
+
+    tol: float = 1.0e-06
+    maxiter: int = 64
 
 
 def _wind_power_methods():
@@ -383,39 +468,34 @@ def damping_power(
     ymax: np.ndarray,
     freq: np.ndarray,
     tension: np.ndarray,
+    conductor: Conductor,
+    bending: Bending | None = None,
     method: str = "",
-    k: np.ndarray = None,
-    l: np.ndarray = None,
-    m: np.ndarray = None,
-    n: np.ndarray = None,
-    d: np.ndarray = None,
-    mu: np.ndarray = None,
-    rts: np.ndarray = None,
-    EImin: np.ndarray = None,
-    EImax: np.ndarray = None,
-    x0: np.ndarray = None,
+    coeffs: DampingCoeffs | None = None,
 ) -> np.ndarray:
     """Evaluate the power dissipated by self-damping.
 
-    If method='olla', all inputs must be floats (no numpy.ndarray). Not all args
-    must be specified (see below).
+    If method='olla', all inputs must be floats (no numpy.ndarray). Not all
+    conductor/bending fields must be set; each method only uses the subset it
+    needs (see below).
 
     'claren', 'foti', 'kraus', 'mocks', 'noiseux1991', 'noiseux1992',
             'olla', 'olla_approx', 'pdm', 'seppa', 'tompkins'
 
     If method is in ['claren', 'kraus', 'mocks', 'noiseux1991', 'pdm', 'seppa',
-    'tompkins'], either arg k or the triplet d, mu and rts must be specified.
+    'tompkins'], either coeffs.k or the conductor triplet d, mu and rts must be
+    specified.
 
-    If method is 'foti', args mu, EImax and x0 must be specified.
+    If method is 'foti', conductor.mu and bending.EImax, bending.x0 must be set.
 
-    If method is 'noiseux1992', args d and mu must be specified.
+    If method is 'noiseux1992', conductor.d and conductor.mu must be set.
 
-    If method is 'olla', args mu, EImin, EImax and x0 must be specified.
+    If method is 'olla', conductor.mu and bending.EImin, EImax, x0 must be set.
 
-    If method is 'olla_approx', args mu, EImax and x0 must be specified.
+    If method is 'olla_approx', conductor.mu and bending.EImax, x0 must be set.
 
-    If method is not specified, either arg k or the triplet d, mu and rts must
-    be specified, along with l, m, n exponents.
+    If method is not specified, either coeffs.k or the conductor triplet d, mu
+    and rts must be specified, along with coeffs.l, coeffs.m, coeffs.n exponents.
 
     Parameters
     ----------
@@ -425,28 +505,15 @@ def damping_power(
         Frequencies relative to vibration (Hz).
     tension : float or numpy.ndarray
         Mechanical tension (N).
+    conductor : Conductor
+        Intrinsic conductor properties (d, mu, rts).
+    bending : Bending, optional
+        Flexural quantities (EImin, EImax, x0). Required by the foti and olla
+        method families.
     method : str
         Choice of method to get damping power.
-    k : float or numpy.ndarray
-        Coefficient.
-    l : float or numpy.ndarray
-        Exponent for ymax
-    m : float or numpy.ndarray
-        Exponent for freq
-    n : float or numpy.ndarray
-        Exponent for 1/tension
-    d : float or numpy.ndarray
-        Cable external diameter (m)
-    mu : float or numpy.ndarray
-        Lineic mass of the cable (kg.m**-1).
-    rts : float or numpy.ndarray
-        Rated tensile strength of the cable (N)
-    EImin: float or numpy.ndarray
-        Minimal tangential bending stiffness of the cable (N.m**2).
-    EImax: float or numpy.ndarray
-        Maximal tangential bending stiffness of the cable (N.m**2).
-    x0 : float or numpy.ndarray
-        Limit curvature (m**-1).
+    coeffs : DampingCoeffs, optional
+        Empirical k, l, m, n coefficients for the klmn damping law.
 
     Returns
     -------
@@ -454,35 +521,57 @@ def damping_power(
         Array of power dissipated by damping.
 
     """
+    if bending is None:
+        bending = Bending()
+    if coeffs is None:
+        coeffs = DampingCoeffs()
+
     if method == "foti":
-        if mu is None or EImax is None or x0 is None:
+        if conductor.mu is None or bending.EImax is None or bending.x0 is None:
             raise ValueError("Args mu, EImax and x0 must be specified when using foti method")
-        return damping_power_foti(ymax, freq, tension, mu, EImax, x0)
+        return damping_power_foti(ymax, freq, tension, conductor.mu, bending.EImax, bending.x0)
     elif method == "noiseux1992":
-        if d is None or mu is None or rts is None:
+        if conductor.d is None or conductor.mu is None or conductor.rts is None:
             raise ValueError("Args d and mu must be specified when using noiseux1992 method")
-        return damping_power_noiseux1992(ymax, freq, tension, d, mu)
+        return damping_power_noiseux1992(ymax, freq, tension, conductor.d, conductor.mu)
     elif method == "olla":
-        if mu is None or EImin is None or EImax is None or x0 is None:
+        if (
+            conductor.mu is None
+            or bending.EImin is None
+            or bending.EImax is None
+            or bending.x0 is None
+        ):
             raise ValueError(
                 "Args mu, EImin, EImax and x0 must be specified when using olla method"
             )
-        return damping_power_cieren(ymax, freq, tension, mu, EImin, EImax, x0, approx=False)
+        return damping_power_cieren(
+            ymax,
+            freq,
+            tension,
+            conductor.mu,
+            bending.EImin,
+            bending.EImax,
+            bending.x0,
+            approx=False,
+        )
     elif method == "olla_approx":
-        if mu is None or EImax is None or x0 is None:
+        if conductor.mu is None or bending.EImax is None or bending.x0 is None:
             raise ValueError("Args mu, EImax and x0 must be specified when using olla method")
-        return damping_power_cieren(ymax, freq, tension, mu, EImin, EImax, x0, approx=True)
+        return damping_power_cieren(
+            ymax, freq, tension, conductor.mu, bending.EImin, bending.EImax, bending.x0, approx=True
+        )
 
+    k, l, m, n = coeffs.k, coeffs.l, coeffs.m, coeffs.n
     if l is None or m is None or n is None:
         if method not in _damping_power_methods():
             raise ValueError("Unknown damping power method")
         l, m, n = _damping_power_coefficients(method)
 
     if k is None:
-        if d is None or mu is None or rts is None:
+        if conductor.d is None or conductor.mu is None or conductor.rts is None:
             raise ValueError("Either k or (d, mu and rts) must be specified")
         else:
-            k = _k_lilien(d, mu, rts)
+            k = _k_lilien(conductor.d, conductor.mu, conductor.rts)
 
     return damping_power_klmn(ymax, freq, tension, k, l, m, n)
 
@@ -525,22 +614,14 @@ def _balance_damping_methods():
 def ymax(
     freq: np.ndarray,
     tension: np.ndarray,
-    d: np.ndarray,
+    conductor: Conductor,
+    bending: Bending | None = None,
     wind_method: str = "cigre",
     damping_method: str = "foti",
     iv: float = 0.0,
-    k: np.ndarray = None,
-    l: np.ndarray = None,
-    m: np.ndarray = None,
-    n: np.ndarray = None,
-    mu: np.ndarray = None,
-    rts: np.ndarray = None,
-    EImin: np.ndarray = None,
-    EImax: np.ndarray = None,
-    x0: np.ndarray = None,
-    stockbridge_cfg: dict | None = None,
-    tol: float = 1.0e-06,
-    maxiter: int = 64,
+    coeffs: DampingCoeffs | None = None,
+    stockbridge: StockbridgeConfig | None = None,
+    solver: SolverConfig | None = None,
 ) -> np.ndarray:
     """Computes vibration amplitude by balancing wind power and damping terms.
 
@@ -550,6 +631,12 @@ def ymax(
         Frequencies relative to vibration (Hz).
     tension : float or numpy.ndarray
         Mechanical tension (N).
+    conductor : Conductor
+        Intrinsic conductor properties (d, mu, rts). conductor.d is always
+        required; the rest depend on the chosen damping method.
+    bending : Bending, optional
+        Flexural quantities (EImin, EImax, x0). Required by the foti and olla
+        damping method families.
     wind_method: str
         Choice of method to get wind power. Default is 'cigre'.
     damping_method : str
@@ -557,32 +644,12 @@ def ymax(
     iv : float
         Turbulence intensity of the wind (no unit). Only used if method='foti'.
         Default is 0.
-    k : float or numpy.ndarray
-        Coefficient.
-    l : float or numpy.ndarray
-        Exponent for ymax
-    m : float or numpy.ndarray
-        Exponent for freq
-    n : float or numpy.ndarray
-        Exponent for 1/tension
-    d : float or numpy.ndarray
-        Cable external diameter (m)
-    mu : float or numpy.ndarray
-        Lineic mass of the cable (kg.m**-1).
-    rts : float or numpy.ndarray
-        Rated tensile strength of the cable (N)
-    EImin : float or numpy.ndarray
-        Minimal tangential bending stiffness of the cable (N.m**2).
-    EImax : float or numpy.ndarray
-        Maximal tangential bending stiffness of the cable (N.m**2).
-    x0 : float or numpy.ndarray
-        Limit curvature (m**-1).
-    stockbridge_cfg : dict
-        Stockbridge configuration. The default is {} (empty dict ie no stockbridges).
-    tol : float
-        Convergence parameter for bisection (tolerance on error)
-    maxiter: int
-        Convergence parameter for bisection (Max. number of iterations)
+    coeffs : DampingCoeffs, optional
+        Empirical k, l, m, n coefficients for the klmn damping law.
+    stockbridge : StockbridgeConfig, optional
+        Stockbridge dampers configuration. The default is no dampers.
+    solver : SolverConfig, optional
+        Bisection convergence parameters (tol, maxiter).
 
     Returns
     -------
@@ -595,12 +662,18 @@ def ymax(
     if damping_method not in _balance_damping_methods():
         raise ValueError("")
 
-    if stockbridge_cfg is None or len(stockbridge_cfg) == 0:
-        stockbridge_cfg = dict(
-            method="foti", tension=0.0, L=1.0, d=1.0, mu=1.0, xs=0.0, fz=[], z=[]
-        )
+    if bending is None:
+        bending = Bending()
+    if coeffs is None:
+        coeffs = DampingCoeffs()
+    if solver is None:
+        solver = SolverConfig()
+    if stockbridge is None:
+        stockbridge = StockbridgeConfig()
 
-    if (damping_method == "olla" and type(freq) is np.ndarray) or len(stockbridge_cfg["z"]) > 0:
+    d = conductor.d
+
+    if (damping_method == "olla" and type(freq) is np.ndarray) or len(stockbridge.z) > 0:
 
         def fun(y):
             wp = wind_power(y, freq, d, iv=iv, method=wind_method)
@@ -611,19 +684,12 @@ def ymax(
                     y[i],
                     freq[i],
                     tension,
+                    conductor,
+                    bending=bending,
                     method=damping_method,
-                    k=k,
-                    l=l,
-                    m=m,
-                    n=n,
-                    d=d,
-                    mu=mu,
-                    rts=rts,
-                    EImin=EImin,
-                    EImax=EImax,
-                    x0=x0,
+                    coeffs=coeffs,
                 )
-                sp[i] = power(ymax=y[i], freq=freq[i], **stockbridge_cfg)
+                sp[i] = power(y[i], freq[i], stockbridge)
 
             return wp - dp - sp
 
@@ -635,17 +701,10 @@ def ymax(
                 y,
                 freq,
                 tension,
+                conductor,
+                bending=bending,
                 method=damping_method,
-                k=k,
-                l=l,
-                m=m,
-                n=n,
-                d=d,
-                mu=mu,
-                rts=rts,
-                EImin=EImin,
-                EImax=EImax,
-                x0=x0,
+                coeffs=coeffs,
             )
             return wp - dp
 
@@ -653,7 +712,7 @@ def ymax(
     ymax = 5.0 * np.ones_like(freq) * d
 
     if type(fun(ymin)) is np.ndarray:
-        y, _ = _vect_bisection(fun, ymin, ymax, tol, maxiter)
+        y, _ = _vect_bisection(fun, ymin, ymax, solver.tol, solver.maxiter)
     else:
         y = bisect(fun, ymin, ymax)
 
