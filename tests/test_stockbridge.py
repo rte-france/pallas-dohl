@@ -54,16 +54,11 @@ def test_power_foti_scales_with_amplitude_squared():
 def test_power_returns_zero_when_z_empty():
     """Without an impedance table, power() returns 0.0."""
     out = stockbridge.power(
-        ymax=1.0e-3,
-        freq=20.0,
-        method="foti",
-        tension=1.0e4,
-        L=30.0,
-        d=0.03,
-        mu=1.5,
-        xs=1.0,
-        fz=[],
-        z=[],
+        1.0e-3,
+        20.0,
+        stockbridge.StockbridgeConfig(
+            method="foti", tension=1.0e4, L=30.0, d=0.03, mu=1.5, xs=1.0, fz=[], z=[]
+        ),
     )
     assert out == 0.0
 
@@ -73,16 +68,11 @@ def test_power_unknown_method_raises():
     z = np.array([1.0 + 0.5j, 1.2 + 0.4j, 1.5 + 0.3j])
     with pytest.raises(ValueError):
         stockbridge.power(
-            ymax=1.0e-3,
-            freq=15.0,
-            method="bogus",
-            tension=1.0e4,
-            L=30.0,
-            d=0.03,
-            mu=1.5,
-            xs=1.0,
-            fz=fz,
-            z=z,
+            1.0e-3,
+            15.0,
+            stockbridge.StockbridgeConfig(
+                method="bogus", tension=1.0e4, L=30.0, d=0.03, mu=1.5, xs=1.0, fz=fz, z=z
+            ),
         )
 
 
@@ -90,16 +80,11 @@ def test_power_foti_method_dispatch_finite():
     fz = np.array([5.0, 10.0, 20.0, 40.0])
     z = np.array([1.0 + 0.5j, 1.2 + 0.4j, 1.5 + 0.3j, 1.8 + 0.2j])
     out = stockbridge.power(
-        ymax=1.0e-3,
-        freq=15.0,
-        method="foti",
-        tension=1.0e4,
-        L=30.0,
-        d=0.03,
-        mu=1.5,
-        xs=1.0,
-        fz=fz,
-        z=z,
+        1.0e-3,
+        15.0,
+        stockbridge.StockbridgeConfig(
+            method="foti", tension=1.0e4, L=30.0, d=0.03, mu=1.5, xs=1.0, fz=fz, z=z
+        ),
     )
     assert np.isfinite(out)
 
@@ -108,16 +93,11 @@ def test_power_wolf_method_finite_and_nonnegative():
     fz = np.array([5.0, 10.0, 20.0, 40.0])
     z = np.array([1.0 + 0.5j, 1.2 + 0.4j, 1.5 + 0.3j, 1.8 + 0.2j])
     out = stockbridge.power(
-        ymax=1.0e-3,
-        freq=15.0,
-        method="wolf",
-        tension=1.0e4,
-        L=30.0,
-        d=0.03,
-        mu=1.5,
-        xs=1.0,
-        fz=fz,
-        z=z,
+        1.0e-3,
+        15.0,
+        stockbridge.StockbridgeConfig(
+            method="wolf", tension=1.0e4, L=30.0, d=0.03, mu=1.5, xs=1.0, fz=fz, z=z
+        ),
     )
     assert np.isfinite(out)
     assert out >= 0.0

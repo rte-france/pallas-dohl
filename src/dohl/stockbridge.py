@@ -1,4 +1,43 @@
+from dataclasses import dataclass, field
+
 import numpy as np
+
+
+@dataclass
+class StockbridgeConfig:
+    """Configuration of the Stockbridge dampers along the span.
+
+    With an empty impedance table (``z=[]``), :func:`power` returns 0.0, i.e.
+    no damper contribution.
+
+    Attributes
+    ----------
+    method : str
+        Dissipation model, in ['foti', 'wolf']. Default is 'foti'.
+    tension : float
+        Mechanical tension (N).
+    L : float
+        Span length (m).
+    d : float
+        Cable external diameter (m). Only used by the 'wolf' method.
+    mu : float
+        Lineic mass of the cable (kg.m**-1).
+    xs : float
+        Damper position from the span end (m).
+    fz : list or numpy.ndarray
+        Frequencies of the impedance table (Hz).
+    z : list or numpy.ndarray
+        Complex impedance values matching ``fz`` (Ns/m).
+    """
+
+    method: str = "foti"
+    tension: float = 0.0
+    L: float = 1.0
+    d: float = 1.0
+    mu: float = 1.0
+    xs: float = 0.0
+    fz: list = field(default_factory=list)
+    z: list = field(default_factory=list)
 
 
 def impedance(e1, j1, l1, m1, e2, j2, l2, m2, mm, rho, a, ej, c, W):
@@ -130,30 +169,19 @@ def power_wolf(ymax, freq, tension, d, mu, xs, z):
     return np.abs(p)
 
 
-def power(
-    ymax=0.0,
-    freq=0.0,
-    method="foti",
-    tension=0.0,
-    L=1.0,
-    d=1.0,
-    mu=1.0,
-    xs=0.0,
-    fz=[],
-    z=[],
-):
-    if len(z) > 0:
+def power(ymax, freq, cfg: StockbridgeConfig):
+    if len(cfg.z) > 0:
         # find z at target frequency
-        z_ = np.interp(freq, fz, z)
+        z_ = np.interp(freq, cfg.fz, cfg.z)
     else:
         return 0.0
 
     # compute sum of powers
-    if method == "foti":
-        p = power_foti(ymax, freq, tension, L, mu, xs, z_)
-    elif method == "wolf":
-        p = power_wolf(ymax, freq, tension, d, mu, xs, z_)
+    if cfg.method == "foti":
+        p = power_foti(ymax, freq, cfg.tension, cfg.L, cfg.mu, cfg.xs, z_)
+    elif cfg.method == "wolf":
+        p = power_wolf(ymax, freq, cfg.tension, cfg.d, cfg.mu, cfg.xs, z_)
     else:
         raise ValueError
 
-    return p / L
+    return p / cfg.L
