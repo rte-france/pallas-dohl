@@ -40,7 +40,7 @@ uv pip install --upgrade pip
 
 # # -- install local package
 if (Test-Path "build") { Remove-Item -Recurse -Force "build" }
-uv sync --group dev
+uv sync --active --group dev
 
 # -- end text
 Write-Host "---"

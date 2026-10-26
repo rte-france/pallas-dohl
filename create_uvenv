@@ -42,7 +42,7 @@ uv pip install --upgrade pip
 
 ## -- install local package
 rm -rf build
-uv sync --group dev
+uv sync --active --group dev
 
 # -- end text
 echo "---"
