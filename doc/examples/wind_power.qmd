@@ -1,0 +1,21 @@
+---
+title: "Wind input power"
+---
+
+The experimental wind power curves of the EPRI Orange Book (tables A2.1-1
+and A2.1-2) over the figure of Brika and Laneville (1995), their polynomial
+fits in [](`~dohl.ebp.wind_power_adim`), and the OLLA and Foti models.
+
+Source: `examples/wind_power.py`.
+
+```{python}
+#| echo: false
+# the script reads its data relative to the repository root
+import os
+
+os.chdir("../..")
+```
+
+```{python}
+{{< include ../../examples/wind_power.py >}}
+```

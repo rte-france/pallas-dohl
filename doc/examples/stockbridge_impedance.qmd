@@ -1,0 +1,12 @@
+---
+title: "Stockbridge impedance"
+---
+
+Modulus and phase of the impedance of a Z5 damper, from
+[](`~dohl.stockbridge.impedance`).
+
+Source: `examples/stockbridge_impedance.py`.
+
+```{python}
+{{< include ../../examples/stockbridge_impedance.py >}}
+```

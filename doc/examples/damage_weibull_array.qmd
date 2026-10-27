@@ -1,0 +1,14 @@
+---
+title: "Weibull damage of many conductors"
+---
+
+Yearly damage of a thousand perturbed Aster 570 conductors under a Weibull
+wind, with [](`~dohl.lifespan.damage_year_weibull`) in a loop and with
+[](`~dohl.lifespan.damage_year_weibull_array`): both agree, and the figure
+plots the lifespan against the tension.
+
+Source: `examples/damage_weibull_array.py`.
+
+```{python}
+{{< include ../../examples/damage_weibull_array.py >}}
+```

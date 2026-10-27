@@ -1,100 +1,95 @@
-# Damage in Overhead Lines
+# dohl
+
+Damage in overhead lines: fatigue damage of overhead line conductors under
+aeolian vibration.
 
 [![ci](https://github.com/rte-france/pallas-dohl/actions/workflows/ci.yml/badge.svg)](https://github.com/rte-france/pallas-dohl/actions/workflows/ci.yml)
-![python](https://img.shields.io/badge/python-3.10%2B-blue)
-![license](https://img.shields.io/badge/license-MPL--2.0-green)
+[![docs](https://github.com/rte-france/pallas-dohl/actions/workflows/docs.yml/badge.svg)](https://github.com/rte-france/pallas-dohl/actions/workflows/docs.yml)
+[![Coverage](https://rte-france.github.io/pallas-dohl/coverage/badge.svg)](https://rte-france.github.io/pallas-dohl/coverage/)
+[![Docs](https://img.shields.io/badge/docs-online-blue)](https://rte-france.github.io/pallas-dohl/)
+![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue)
+[![License: MPL-2.0](https://img.shields.io/badge/license-MPL--2.0-green)](LICENSE)
 
-_**dohl**_ is a python package to evaluate fatigue damage in overhead transmission lines from aeolian vibration. It implements established methods from the EPRI "Orange Book" and CIGRE (safe-border-line, fictive stress, energy balance principle, Stockbridge dampers, Weibull-integrated lifespan).
+![Antinode amplitude and yearly damage of an Aster 570 conductor against wind speed](doc/images/hero.png)
 
-## Table of contents
+## Features
 
-* [Installation](#installation)
-* [Basic usage](#basic-usage)
-* [Testing](#testing)
-* [Building the documentation](#building-the-documentation)
+- Energy balance: wind input power (CIGRE, Foti, OLLA and experimental fits
+  from the EPRI Orange Book) against conductor self-damping (Foti, OLLA,
+  Noiseux and empirical power laws), solved for the vibration amplitude.
+- Fatigue damage: fictive stress at the clamp, from the antinode amplitude or
+  from the Poffenberger-Swart amplitude; safe border line for single and
+  multi-layer ACSR; number of cycles by quantile regression.
+- Lifespan: yearly damage at a given wind speed, over a wind and tension
+  history, or integrated over a Weibull wind distribution.
+- Stockbridge dampers (experimental): dissipated power added to the energy
+  balance.
 
 ## Installation
 
-Install from GitHub:
-
 ```shell
-python -m pip install git+https://github.com/rte-france/pallas-dohl
+python -m pip install "dohl @ git+https://github.com/rte-france/pallas-dohl"
 ```
 
-Or from a local clone:
+or, with [uv](https://docs.astral.sh/uv/):
 
 ```shell
-python -m pip install .
+uv add "dohl @ git+https://github.com/rte-france/pallas-dohl"
 ```
 
-Two helper scripts (`create_uvenv` for linux, `create_uvenv.ps1` for windows) at project root build a development environment with the `uv` package manager.
+## Quick start
 
-## Basic usage
-
-Estimate annual fatigue damage of an Aster 570 conductor across a range of wind speeds:
+Yearly damage of an Aster 570 conductor at 15 % of its rated tensile
+strength, for wind speeds from 0.5 to 5 m/s:
 
 ```python
 import numpy as np
+
 from dohl.lifespan import damage_year
 
-# Aster 570 conductor data
-mu, D, d = 1.571, 3.105e-2, 3.45e-3        # lineic mass (kg/m), external diameter (m), last-layer strand diameter (m)
-rts = 1.853e5                              # rated tensile strength (N)
-EImin, EImax = 28.28, 2155.0               # bending stiffness range (N.m**2)
-young = 6.8e10                             # Young's modulus (Pa)
-alpha = 0.140652                           # tension-to-curvature coefficient
+# Aster 570: lineic mass (kg/m), external and last-strand diameters (m)
+mu, D, d = 1.571, 3.105e-02, 3.45e-03
+rts, young = 1.853e05, 6.8e10  # rated tensile strength (N), Young modulus (Pa)
+EImin, EImax = 28.28, 2155.0  # bending stiffness range (N.m**2)
+alpha = 0.140652  # limit curvature at full rated tensile strength (m**-1)
 
-# Wind speeds (m/s) and span tension (arbitrary 15% of RTS)
 u = np.linspace(0.5, 5.0, 10)
-H = 0.15 * rts * np.ones_like(u)
-
+tension = 0.15 * rts
 ymax, yb, sigma, dmg = damage_year(
-    u, H, D, d, mu, young, EImin, EImax,
-    multilayer=False,
-    rts=rts,
-    x0=alpha * H / rts,
+    u, tension, D, d, mu, young, EImin, EImax,
+    multilayer=False, rts=rts, x0=alpha * tension / rts,
 )
-
-print("annual damage per wind speed:", dmg)
+print("yearly damage per wind speed:", dmg)
 ```
 
-## Testing
+## Documentation
 
-The test suite is in `tests/` and runs with pytest:
+- [Documentation](https://rte-france.github.io/pallas-dohl/): user guide,
+  examples and API reference.
+- [Examples](examples/): short scripts, each ending with its figures.
+- [Coverage report](https://rte-france.github.io/pallas-dohl/coverage/).
+
+## Development
+
+The scripts `create_uvenv` (Linux) and `create_uvenv.ps1` (Windows) build a
+development environment with uv. Otherwise:
 
 ```shell
-uv sync --group test
-uv run pytest --cov=dohl
+uv sync --group dev
+uv run pytest --cov=dohl --cov-report=term              # tests with coverage
+uv run ruff check src/dohl tests && uv run ruff format --check src/dohl tests  # lint
 ```
 
-Current state (61 tests, 1.0s runtime):
+Building the documentation is described in [CONTRIBUTING.md](CONTRIBUTING.md#documentation).
 
-| Module                                          | Coverage |
-| ----------------------------------------------- | -------- |
-| `dohl/stockbridge.py`                           | 100%     |
-| `dohl/config.py`                                | 97%      |
-| `dohl/ebp.py`                                   | 89%      |
-| `dohl/lifespan.py`                              | 86%      |
-| `dohl/damage.py`                                | 75%      |
-| **Total** (excluding `_fatigue_model_input.py`) | **~88%** |
+## Contributing and license
 
-The internal `_fatigue_model_input.py` depends on the `strdcable` package which is not a runtime dependency, so it is excluded from coverage targets.
-
-Continuous integration runs the suite on Ubuntu, Windows and macOS for Python 3.10, 3.11 and 3.12, plus a lint job (`ruff check`, `ruff format --check`, `mypy` advisory). See `.github/workflows/ci.yml`.
-
-## Building the documentation
-
-Install the doc dependency group, then build:
-
-```shell
-uv sync --group doc
-cd doc
-make html
-```
-
-The documentation can then be accessed from `doc/build/html/index.html`.
+See [CONTRIBUTING.md](CONTRIBUTING.md) and the [code of conduct](code_of_conduct.md).
+dohl is distributed under the [Mozilla Public License 2.0](LICENSE).
 
 ## Acknowledgements
 
-_**dohl**_ is developed by [Mews Labs](https://www.mews-labs.com) (formerly _Eurobios_) and supported by [Rte-R&D](https://www.rte-france.com/)
-_via_ the OLLA & PALLAS projects (see [ResearchGate](https://www.researchgate.net/project/OLLA-overhead-lines-lifespan-assessment)).
+dohl is developed by [Mews Labs](https://www.mews-labs.com) (formerly
+Eurobios) and supported by [RTE R&D](https://www.rte-france.com/) via the
+OLLA and PALLAS projects (see
+[ResearchGate](https://www.researchgate.net/project/OLLA-overhead-lines-lifespan-assessment)).

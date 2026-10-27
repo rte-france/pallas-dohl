@@ -1,0 +1,13 @@
+---
+title: "Fictive stress"
+---
+
+The fictive stress of [](`~dohl.damage.fictive_stress`) against the antinode
+amplitude, for its three methods and three bending stiffnesses, at several
+frequencies and tensions.
+
+Source: `examples/fictive_stress.py`.
+
+```{python}
+{{< include ../../examples/fictive_stress.py >}}
+```

@@ -1,0 +1,12 @@
+{
+  "hash": "562be275d3da139a88549ceb52c06b0c",
+  "result": {
+    "engine": "jupyter",
+    "markdown": "---\ntitle: \"Quantile regression\"\n---\n\nThe number of cycles to failure of [](`~dohl.damage.num_cycles_qreg_said`)\nagainst the fatigue tests it is fitted on, for three pairs of quantiles.\n\nSource: `examples/qreg.py`.\n\n::: {#22d64900 .cell execution_count=1}\n``` {.python .cell-code}\n\"\"\"Number of cycles to failure by quantile regression, against the fatigue tests.\n\n`dohl.damage.num_cycles_qreg_said` evaluated on the fatigue tests it is\nfitted on, for the 0.5, 0.9 and 0.99 quantiles and their complements.\n\"\"\"\n\nimport matplotlib.pyplot as plt\n\nfrom dohl import damage\nfrom dohl.config import _FatigueData\n\ndf = _FatigueData.qreg_input()\nx = df[[\"ten_rat\", \"yad_log\", \"ybga\", \"ka\"]].values\ny = df[\"logN\"].values\n\nfig, ax = plt.subplots(nrows=1, ncols=3, figsize=(12.8, 4.8), sharey=True)\nfor a, q in zip(ax, [0.5, 0.9, 0.99], strict=True):\n    yp1, yp2 = damage.num_cycles_qreg_said(x[:, 0], x[:, 1], x[:, 2], x[:, 3], q=q, log=True)\n    a.scatter(y, yp1, label=f\"QReg ({q:.3f})\", marker=\".\")\n    a.scatter(y, yp2, label=f\"QReg ({1.0 - q:.3f})\", marker=\".\")\n    a.plot([y.min(), y.max()], [y.min(), y.max()], color=\"grey\", linestyle=\"--\", label=\"y=x\")\n    a.set(xlabel=\"experimental log(N)\", ylabel=\"predicted log(N)\", ylim=[5.0, 9.0])\n    a.legend()\n    a.grid(True)\nfig.tight_layout()\nplt.show()\n```\n\n::: {.cell-output .cell-output-display}\n![](qreg_files/figure-html/cell-2-output-1.png){width=1219 height=451}\n:::\n:::\n\n\n",
+    "supporting": [
+      "qreg_files"
+    ],
+    "filters": [],
+    "includes": {}
+  }
+}

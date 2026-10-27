@@ -1,0 +1,14 @@
+---
+title: "Damping power"
+---
+
+Power dissipated by self-damping in an Aster 570 conductor, for every method
+of [](`~dohl.ebp.damping_power`) but `olla`, too slow on arrays and replaced
+by `olla_approx`. Each panel varies one input, amplitude, frequency or
+tension, the two others being fixed at mid-range.
+
+Source: `examples/damping_power.py`.
+
+```{python}
+{{< include ../../examples/damping_power.py >}}
+```

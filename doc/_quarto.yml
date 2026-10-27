@@ -1,0 +1,76 @@
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: "dohl"
+  repo-url: https://github.com/rte-france/pallas-dohl
+  repo-actions: [source, issue]
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - href: getting-started.qmd
+        text: Getting started
+      - text: User guide
+        menu:
+          - ebp.qmd
+          - damage.qmd
+          - lifespan.qmd
+          - stockbridge.qmd
+      - href: examples/index.qmd
+        text: Examples
+      - href: reference/index.qmd
+        text: API
+      - href: coverage/index.html
+        text: Coverage
+  page-footer:
+    center: "dohl, Mozilla Public License 2.0"
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    code-copy: true
+    html-math-method: mathjax
+
+execute:
+  freeze: auto
+  # the bisection evaluates some damping laws at ymax = 0
+  warning: false
+
+filters:
+  - interlinks
+
+interlinks:
+  sources:
+    python:
+      url: https://docs.python.org/3/
+    numpy:
+      url: https://numpy.org/doc/stable/
+
+quartodoc:
+  package: dohl
+  dir: reference
+  parser: numpy
+  title: API reference
+  render_interlinks: true
+  options:
+    children: embedded
+  sections:
+    - title: Energy balance
+      desc: Wind input power, self-damping power and the vibration amplitude that balances them.
+      contents:
+        - ebp
+    - title: Fatigue damage
+      desc: Fictive stress, safe border line and number of cycles to failure.
+      contents:
+        - damage
+    - title: Lifespan
+      desc: Damage over a year, a wind history or a Weibull wind distribution.
+      contents:
+        - lifespan
+    - title: Stockbridge dampers (experimental)
+      desc: Damper configuration, impedance and dissipated power.
+      contents:
+        - stockbridge

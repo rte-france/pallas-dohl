@@ -1,0 +1,81 @@
+---
+title: "Getting started"
+---
+
+## Install
+
+```bash
+python -m pip install "dohl @ git+https://github.com/rte-france/pallas-dohl"
+```
+
+## The building blocks
+
+The energy balance of [](`dohl.ebp`) groups its inputs in dataclasses:
+
+- a [](`~dohl.ebp.Conductor`): external diameter, lineic mass and rated
+  tensile strength, which do not depend on the tension;
+- a [](`~dohl.ebp.Bending`): minimal and maximal bending stiffness and limit
+  curvature, which may depend on the tension;
+- optionally, [](`~dohl.ebp.DampingCoeffs`) to override the coefficients of
+  the empirical damping laws, a [](`~dohl.stockbridge.StockbridgeConfig`) to
+  add dampers, and a [](`~dohl.ebp.SolverConfig`) for the bisection.
+
+Each damping method only reads the fields it needs and raises if one of them
+is missing. The functions of [](`dohl.damage`) and [](`dohl.lifespan`) take
+plain arrays.
+
+## Vibration amplitude
+
+The antinode amplitude balances the wind input power and the self-damping
+power, for each vibration frequency. Here with the CIGRE wind power and three
+damping models:
+
+```{python}
+import matplotlib.pyplot as plt
+import numpy as np
+
+from dohl import ebp
+
+# Aster 570 conductor
+D, mu, rts = 3.105e-02, 1.571, 1.853e05
+EImin, EImax, alpha = 28.28, 2155.0, 0.140652
+
+tension = 0.15 * rts
+conductor = ebp.Conductor(d=D, mu=mu, rts=rts)
+bending = ebp.Bending(EImin=EImin, EImax=EImax, x0=alpha * tension / rts)
+
+freq = np.linspace(5.0, 50.0, 46)
+for method in ["foti", "olla_approx", "pdm"]:
+    y = ebp.ymax(freq, tension, conductor, bending=bending, damping_method=method)
+    plt.plot(freq, y / D, label=method)
+plt.xlabel("frequency (Hz)")
+plt.ylabel("ymax / D")
+plt.legend()
+plt.show()
+```
+
+## Lifespan
+
+[](`~dohl.lifespan.damage_year_weibull`) integrates the yearly damage over a
+Weibull wind distribution; its inverse is the lifespan in years:
+
+```{python}
+from dohl.lifespan import damage_year_weibull
+
+d, young = 3.45e-03, 6.8e10  # last-strand diameter (m), Young modulus (Pa)
+ratios = np.linspace(0.10, 0.25, 16)
+life = []
+for ratio in ratios:
+    tension = ratio * rts
+    dmg = damage_year_weibull(
+        2.0, 3.0, tension, D, d, mu, young, EImin, EImax,
+        multilayer=False, rts=rts, x0=alpha * tension / rts,
+    )
+    life.append(1.0 / dmg)
+
+plt.semilogy(100 * ratios, life)
+plt.xlabel("tension (% RTS)")
+plt.ylabel("lifespan (years)")
+plt.title("Weibull wind, shape 2 and scale 3 m/s")
+plt.show()
+```

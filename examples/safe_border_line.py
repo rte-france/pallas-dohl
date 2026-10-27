@@ -23,7 +23,7 @@ if __name__ == "__main__":
         ax[i].set_xlim(N[[0, -1]])
         ax[i].set_xlabel("Num cycles at first wire break")
         ax[i].set_ylabel("Fictive stress (MPa)")
-        ax[i].set_title("Fatigue test of %s-layer ACSR" % (["one", "two", "three"][i],))
+        ax[i].set_title(f"Fatigue test of {['one', 'two', 'three'][i]}-layer ACSR")
         ax[i].grid(True)
     ax[0].set_ylim([0, 80])
     ax[1].set_ylim([0, 45])

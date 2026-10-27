@@ -1,0 +1,12 @@
+---
+title: "Quantile regression"
+---
+
+The number of cycles to failure of [](`~dohl.damage.num_cycles_qreg_said`)
+against the fatigue tests it is fitted on, for three pairs of quantiles.
+
+Source: `examples/qreg.py`.
+
+```{python}
+{{< include ../../examples/qreg.py >}}
+```

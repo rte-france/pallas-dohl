@@ -1,0 +1,39 @@
+---
+title: "Lifespan"
+---
+
+[](`dohl.lifespan`) chains the [energy balance](ebp.qmd) and the
+[fatigue damage](damage.qmd): for a wind speed $u$, the vibration frequency
+is $f = S u / D$, the amplitude $y_{max}$ comes from
+[](`~dohl.ebp.ymax`), the stress $\sigma$ from
+[](`~dohl.damage.fictive_stress`) and the number of cycles to failure $N$
+from [](`~dohl.damage.inv_safe_border_line`). Vibrating at $f$ all year long,
+the conductor sustains the damage (Miner's rule)
+
+$$
+d_{year} = \frac{f \cdot 365.25 \cdot 86400}{N(\sigma)}.
+$$
+
+A damage of 1 means failure; the lifespan in years is $1 / d_{year}$.
+
+The functions take the conductor as plain arrays: external and last-strand
+diameters, lineic mass, Young modulus, bending stiffness range, rated tensile
+strength and limit curvature, plus the wind, damping and fictive stress
+methods, and optional [Stockbridge dampers](stockbridge.qmd).
+
+| Function | Wind | Returns |
+|----------|------|---------|
+| [](`~dohl.lifespan.damage_year`) | one or several wind speeds | amplitude, $Y_b$, stress and yearly damage per wind speed |
+| [](`~dohl.lifespan.damage_history`) | time series of wind speed and tension | damage over the series |
+| [](`~dohl.lifespan.damage_year_weibull`) | Weibull distribution | yearly damage |
+| [](`~dohl.lifespan.damage_year_weibull_array`) | one Weibull distribution per conductor | yearly damage per conductor |
+
+[](`~dohl.lifespan.damage_year_weibull`) integrates
+[](`~dohl.lifespan.damage_year`) weighted by the Weibull density, over wind
+speeds from 0.1 to 15 m/s. [](`~dohl.lifespan.damage_year_weibull_array`)
+does the same for many conductors at once, broadcasting every input to the
+number of conductors. In [](`~dohl.lifespan.damage_history`), the limit
+curvature follows the tension through `beta`, $x_0 = \beta T$.
+
+[Getting started](getting-started.qmd#lifespan) plots the lifespan against
+the tension for a Weibull wind.

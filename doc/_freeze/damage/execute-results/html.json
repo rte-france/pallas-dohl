@@ -1,0 +1,12 @@
+{
+  "hash": "a7723ed4dfb47c6372d99d3b4666e899",
+  "result": {
+    "engine": "jupyter",
+    "markdown": "---\ntitle: \"Fatigue damage\"\n---\n\nAeolian vibration bends the conductor at the clamp and breaks its outer\nstrands by fatigue. [](`dohl.damage`) turns a vibration amplitude into a\nstress, and a stress into a number of cycles to failure.\n\n## Fictive stress\n\n[](`~dohl.damage.fictive_stress`) computes the bending stress of the outer\nstrand at the clamp (EPRI Orange Book, chapter \"Fatigue of overhead\nconductors\"), with one of three methods:\n\n- `fymax`: from the antinode amplitude and frequency (eq. 3.2-14);\n- `ba_cigre` and `ba_pfs`: from the bending amplitude $Y_b$ at\n  $x_b = 89$ mm from the clamp (Poffenberger-Swart, eq. 3.2-15), $Y_b$ being\n  derived from $y_{max}$ with the CIGRE formula or the Poffenberger-Swart one.\n\nThe stress depends on the last-strand diameter, the Young modulus and the\nbending stiffness $EI$; [](`dohl.lifespan`) chooses $EI$ between `EImin`,\n`EImax` and their mean with its `fsba` argument.\n\n## Safe border line\n\n[](`~dohl.damage.safe_border_line`) gives the stress amplitude a conductor\nwithstands for $N$ cycles, for single and multi-layer ACSR (Orange Book,\n\"Safe Border Line Method\"); [](`~dohl.damage.inv_safe_border_line`) gives the\nnumber of cycles for a stress.\n\n::: {#be58e313 .cell execution_count=1}\n``` {.python .cell-code}\nimport matplotlib.pyplot as plt\nimport numpy as np\n\nfrom dohl import damage\n\nN = np.logspace(5, 10, 101)\nplt.semilogx(N, damage.safe_border_line(N, False), label=\"single-layer ACSR\")\nplt.semilogx(N, damage.safe_border_line(N, True), label=\"multi-layer ACSR\")\nplt.xlabel(\"number of cycles\")\nplt.ylabel(\"stress amplitude (MPa)\")\nplt.legend()\nplt.show()\n```\n\n::: {.cell-output .cell-output-display}\n![](damage_files/figure-html/cell-2-output-1.png){width=585 height=431}\n:::\n:::\n\n\nThe [safe border line example](examples/safe_border_line.qmd) compares both\ncurves with the EPRI fatigue tests.\n\n## Quantile regression\n\n[](`~dohl.damage.num_cycles_qreg_said`) estimates the number of cycles to\nfailure from reduced tension, amplitude, catenary offset and fictive stress,\nby quantile regression on the fatigue tests shipped with the package (Said,\n*Metamodel applied to fatigue damage in overhead lines conductors*, CIGRE\n2022). It returns the estimates of the `q` and `1 - q` quantiles.\n\n",
+    "supporting": [
+      "damage_files"
+    ],
+    "filters": [],
+    "includes": {}
+  }
+}

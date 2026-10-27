@@ -1,0 +1,12 @@
+{
+  "hash": "1971822c06464e8bfca3ea427b1e3a39",
+  "result": {
+    "engine": "jupyter",
+    "markdown": "---\ntitle: \"Amplitude for every pair of methods\"\n---\n\nThe antinode amplitude from [](`~dohl.ebp.ymax`) for every wind and damping\nmethod accepted by the solver, at three tensions. With the `olla` wind power\nthe amplitude jumps at low frequency; `cigre` and `foti` (identical without\nturbulence) give realistic results with every damping method.\n\nSource: `examples/ymax_methods.py`.\n\n::: {#e96a650a .cell execution_count=1}\n``` {.python .cell-code}\n\"\"\"Vibration amplitude for every pair of wind and damping methods.\n\nOne panel per pair accepted by `dohl.ebp.ymax` (rows: wind methods, columns:\ndamping methods), for an Aster 570 conductor at 5, 15 and 25 % of its rated\ntensile strength.\n\"\"\"\n\nimport matplotlib.pyplot as plt\nimport numpy as np\n\nfrom dohl import ebp\n\n# Aster 570 conductor\nmu, D, rts = 1.571, 3.105e-02, 1.853e05\nEImin, EImax, alpha = 28.28, 2155.0, 0.140652249164\n\nconductor = ebp.Conductor(d=D, mu=mu, rts=rts)\nfreq = np.linspace(0.0, 50, 51)[1:]\nratios = [0.05, 0.15, 0.25]\nwind_methods = ebp._balance_wind_methods()\ndamping_methods = ebp._balance_damping_methods()\n\nfig, ax = plt.subplots(\n    nrows=len(wind_methods),\n    ncols=len(damping_methods),\n    figsize=(24, 11),\n    sharex=True,\n    sharey=True,\n)\nfor i, wm in enumerate(wind_methods):\n    for j, dm in enumerate(damping_methods):\n        for k, ratio in enumerate(ratios):\n            bending = ebp.Bending(EImin=EImin, EImax=EImax, x0=alpha * ratio)\n            y = ebp.ymax(\n                freq,\n                ratio * rts,\n                conductor,\n                bending=bending,\n                wind_method=wm,\n                damping_method=dm,\n            )\n            ax[i, j].plot(freq, y / D, c=f\"C{k}\", label=f\"T = {ratio:.0%} RTS\")\n        ax[i, j].set_title(f\"{wm} / {dm}\", fontsize=\"small\")\n        ax[i, j].grid(True)\nax[0, 0].set_ylim([0, 1])\nax[0, 0].legend(fontsize=\"small\")\nfor a in ax[:, 0]:\n    a.set_ylabel(\"ymax / D\")\nfor a in ax[-1, :]:\n    a.set_xlabel(\"freq (Hz)\")\n\nfig.tight_layout()\nplt.show()\n```\n\n::: {.cell-output .cell-output-display}\n![](ymax_methods_files/figure-html/cell-2-output-1.png){width=2294 height=1046}\n:::\n:::\n\n\n",
+    "supporting": [
+      "ymax_methods_files"
+    ],
+    "filters": [],
+    "includes": {}
+  }
+}
