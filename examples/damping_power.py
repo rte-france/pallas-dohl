@@ -34,9 +34,9 @@ if __name__ == "__main__":
     _ = mth.pop(6)
 
     # loop on methods, plots
-    fig, ax = plt.subplots(nrows=1, ncols=3)
+    fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(12.8, 4.8))
     ix = 499
-    for mt in ["foti", "olla_approx", "pdm"]:
+    for mt in mth:
         X = y
         bending = ebp.Bending(EImin=EImin, EImax=EImax, x0=x0[ix])
         Y = ebp.damping_power(X, f[ix], t[ix], conductor, bending=bending, method=mt)
@@ -59,5 +59,6 @@ if __name__ == "__main__":
     for i in range(3):
         ax[i].grid(True)
         ax[i].legend()
+    fig.tight_layout()
 
     plt.show()
