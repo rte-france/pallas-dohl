@@ -1,0 +1,12 @@
+{
+  "hash": "0bc471edc8428620e0b5bc04195b7316",
+  "result": {
+    "engine": "jupyter",
+    "markdown": "---\ntitle: \"Stockbridge impedance\"\n---\n\nModulus and phase of the impedance of a Z5 damper, from\n[](`~dohl.stockbridge.impedance`).\n\nSource: `examples/stockbridge_impedance.py`.\n\n::: {#83467361 .cell execution_count=1}\n``` {.python .cell-code}\n\"\"\"Impedance of a Stockbridge damper against frequency.\n\n`dohl.stockbridge.impedance` (Politecnico di Milano model) for a Z5 damper:\nmodulus and phase.\n\"\"\"\n\nimport matplotlib.pyplot as plt\nimport numpy as np\n\nfrom dohl.stockbridge import impedance\n\n# Z5 damper: offsets (m), moments of inertia (kg.m**2), messenger lengths (m),\n# end masses (kg), centre mass (kg), messenger density (kg/m**3), section\n# (m**2), bending stiffness (N.m**2) and damping coefficient\nz5 = dict(\n    e1=0.02,\n    j1=1.815e-03,\n    l1=0.157,\n    m1=0.8633,\n    e2=0.01,\n    j2=9.614e-04,\n    l2=0.113,\n    m2=0.7652,\n    mm=0.3532,\n    rho=7800.0,\n    a=9.85e-05,\n    ej=4.903,\n    c=1.962,\n)\n\nf = np.linspace(0.0, 50, 501)[1:]\nz = impedance(**z5, W=2.0 * np.pi * f)\n\nfig, ax = plt.subplots(nrows=2, sharex=True)\nax[0].plot(f, np.abs(z))\nax[0].set_ylabel(\"Modulus (N.s/m)\")\nax[1].plot(f, np.angle(z, deg=True))\nax[1].set_ylabel(\"Phase (deg)\")\nax[1].set_xlabel(\"Freq (Hz)\")\nfor a in ax:\n    a.grid(True)\nplt.show()\n```\n\n::: {.cell-output .cell-output-display}\n![](stockbridge_impedance_files/figure-html/cell-2-output-1.png){width=618 height=429}\n:::\n:::\n\n\n",
+    "supporting": [
+      "stockbridge_impedance_files"
+    ],
+    "filters": [],
+    "includes": {}
+  }
+}

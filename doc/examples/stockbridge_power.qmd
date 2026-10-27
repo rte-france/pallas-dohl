@@ -1,0 +1,19 @@
+---
+title: "Stockbridge dissipated power"
+---
+
+::: {.callout-warning}
+Work in progress: the dissipated power changes sign with the impedance phase,
+and its level is not validated.
+:::
+
+Power dissipated by an SDM damper against its position along the span, with
+[](`~dohl.stockbridge.power_foti`) (solid) and
+[](`~dohl.stockbridge.power_wolf`) (dashed, absolute value), for three wind
+speeds.
+
+Source: `examples/stockbridge_power.py`.
+
+```{python}
+{{< include ../../examples/stockbridge_power.py >}}
+```

@@ -1,0 +1,55 @@
+---
+title: "Fatigue damage"
+---
+
+Aeolian vibration bends the conductor at the clamp and breaks its outer
+strands by fatigue. [](`dohl.damage`) turns a vibration amplitude into a
+stress, and a stress into a number of cycles to failure.
+
+## Fictive stress
+
+[](`~dohl.damage.fictive_stress`) computes the bending stress of the outer
+strand at the clamp (EPRI Orange Book, chapter "Fatigue of overhead
+conductors"), with one of three methods:
+
+- `fymax`: from the antinode amplitude and frequency (eq. 3.2-14);
+- `ba_cigre` and `ba_pfs`: from the bending amplitude $Y_b$ at
+  $x_b = 89$ mm from the clamp (Poffenberger-Swart, eq. 3.2-15), $Y_b$ being
+  derived from $y_{max}$ with the CIGRE formula or the Poffenberger-Swart one.
+
+The stress depends on the last-strand diameter, the Young modulus and the
+bending stiffness $EI$; [](`dohl.lifespan`) chooses $EI$ between `EImin`,
+`EImax` and their mean with its `fsba` argument.
+
+## Safe border line
+
+[](`~dohl.damage.safe_border_line`) gives the stress amplitude a conductor
+withstands for $N$ cycles, for single and multi-layer ACSR (Orange Book,
+"Safe Border Line Method"); [](`~dohl.damage.inv_safe_border_line`) gives the
+number of cycles for a stress.
+
+```{python}
+import matplotlib.pyplot as plt
+import numpy as np
+
+from dohl import damage
+
+N = np.logspace(5, 10, 101)
+plt.semilogx(N, damage.safe_border_line(N, False), label="single-layer ACSR")
+plt.semilogx(N, damage.safe_border_line(N, True), label="multi-layer ACSR")
+plt.xlabel("number of cycles")
+plt.ylabel("stress amplitude (MPa)")
+plt.legend()
+plt.show()
+```
+
+The [safe border line example](examples/safe_border_line.qmd) compares both
+curves with the EPRI fatigue tests.
+
+## Quantile regression
+
+[](`~dohl.damage.num_cycles_qreg_said`) estimates the number of cycles to
+failure from reduced tension, amplitude, catenary offset and fictive stress,
+by quantile regression on the fatigue tests shipped with the package (Said,
+*Metamodel applied to fatigue damage in overhead lines conductors*, CIGRE
+2022). It returns the estimates of the `q` and `1 - q` quantiles.

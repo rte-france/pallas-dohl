@@ -1,0 +1,42 @@
+---
+title: "Examples"
+---
+
+Scripts from the `examples/` folder, each ending with its figures. Run one
+from the repository root with `uv run python examples/<name>.py`.
+
+Energy balance:
+
+- [Wind input power](wind_power.qmd): the EPRI experimental curves, their
+  fits, and the OLLA and Foti models.
+- [Damping power](damping_power.qmd): the self-damping power of every method
+  against amplitude, frequency and tension.
+- [Amplitude for every pair of methods](ymax_methods.qmd): the antinode
+  amplitude against frequency for each wind and damping method.
+- [Comparing damping methods](ymax_damping_comparison.qmd): amplitudes on
+  random cases and the rank correlation between damping methods.
+
+Fatigue damage:
+
+- [Bending amplitude near the clamp](bending_amplitude.qmd): the CIGRE and
+  Poffenberger-Swart amplitudes behind the fictive stress.
+- [Fictive stress](fictive_stress.qmd): the three methods against the
+  antinode amplitude.
+- [Safe border line](safe_border_line.qmd): the single and multi-layer
+  curves against the EPRI fatigue tests, and their inverse.
+- [Quantile regression](qreg.qmd): predicted against measured cycles to
+  failure.
+
+Lifespan:
+
+- [Yearly damage against wind speed](damage_year.qmd): amplitude, stress,
+  strain and damage for each fictive stress method.
+- [Weibull damage of many conductors](damage_weibull_array.qmd): the scalar
+  and array versions, and the lifespan against the tension.
+
+Stockbridge dampers (experimental):
+
+- [Impedance](stockbridge_impedance.qmd): modulus and phase of a damper
+  impedance.
+- [Dissipated power](stockbridge_power.qmd): the power against the damper
+  position (work in progress).

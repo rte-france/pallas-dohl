@@ -1,0 +1,14 @@
+---
+title: "Comparing damping methods"
+---
+
+The amplitude for random frequencies and tensions with the CIGRE wind power
+and each damping method. Their levels differ, but they rank the cases in a
+similar order: the Kendall tau between two methods is above 0.7, and above
+0.9 for most pairs not involving `claren`.
+
+Source: `examples/ymax_damping_comparison.py`.
+
+```{python}
+{{< include ../../examples/ymax_damping_comparison.py >}}
+```

@@ -1,0 +1,46 @@
+---
+title: "Stockbridge dampers"
+---
+
+::: {.callout-warning}
+The Stockbridge models are experimental: the `wolf` model gives a
+dissipated power whose sign is not always consistent, and its absolute value
+is returned.
+:::
+
+Stockbridge dampers add a dissipation term to the [energy balance](ebp.qmd).
+They are described by a [](`~dohl.stockbridge.StockbridgeConfig`): the
+dissipation model, the tension, span length, conductor diameter and lineic
+mass, the damper position from the span end, and the damper impedance as a
+table of complex values against frequency.
+
+[](`~dohl.stockbridge.power`) interpolates the impedance at the vibration
+frequency and returns the dissipated power per unit length of span, with
+either model:
+
+- `foti`: the power dissipated at the damper position for the span mode
+  closest to the vibration frequency (Foti);
+- `wolf`: Wolf (2008), *Using the energy balance method in estimation of
+  overhead transmission line aeolian vibrations*, Strojarstvo 50 (5).
+
+With an empty impedance table, the default, the power is 0: no damper.
+[](`~dohl.stockbridge.impedance`) computes the impedance of a damper from its
+geometry and masses (Politecnico di Milano model, RTE note
+H-R27-2010-02975-FR).
+
+Passed to [](`~dohl.ebp.ymax`) or to the [](`dohl.lifespan`) functions, the
+dampers are added to the balance, which is then solved one frequency at a
+time:
+
+```python
+import numpy as np
+
+from dohl import ebp
+from dohl.stockbridge import StockbridgeConfig
+
+dampers = StockbridgeConfig(
+    method="foti", tension=tension, L=400.0, mu=1.571, xs=1.0,
+    fz=frequencies, z=impedances,
+)
+y = ebp.ymax(freq, tension, conductor, bending=bending, stockbridge=dampers)
+```

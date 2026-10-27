@@ -1,0 +1,14 @@
+---
+title: "Bending amplitude near the clamp"
+---
+
+The conductor amplitude at a distance from the clamp, with the CIGRE and
+Poffenberger-Swart formulas behind the `ba_cigre` and `ba_pfs` methods of
+[](`~dohl.damage.fictive_stress`), for the minimal, mean and maximal bending
+stiffness.
+
+Source: `examples/bending_amplitude.py`.
+
+```{python}
+{{< include ../../examples/bending_amplitude.py >}}
+```

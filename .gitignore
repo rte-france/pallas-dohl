@@ -7,6 +7,15 @@ __pycache__
 .venv
 build
 dist
-doc/_build
+# documentation (Quarto) and coverage outputs
+doc/_site/
+doc/.quarto/
+doc/reference/
+doc/objects.inv
+doc/objects.json
+doc/_inv/
+**/*.quarto_ipynb
+coverage.xml
+htmlcov/
 uv.lock
 .coverage

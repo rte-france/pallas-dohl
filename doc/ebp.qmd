@@ -1,0 +1,77 @@
+---
+title: "Energy balance"
+---
+
+The energy balance principle gives the steady amplitude of aeolian
+vibration: at each frequency $f$, the antinode amplitude $y_{max}$ is the one
+for which the power the wind brings to the conductor equals the power it
+dissipates,
+
+$$
+P_{wind}(y_{max}, f) = P_{damping}(y_{max}, f, T) + P_{dampers}(y_{max}, f),
+$$
+
+with $T$ the mechanical tension. The vibration frequency follows from the
+wind speed $u$ through the Strouhal number, $f = S u / D$ with $S = 0.2$ by
+default and $D$ the external diameter.
+
+## Wind input power
+
+[](`~dohl.ebp.wind_power`) returns the power per unit length,
+$P_{wind} = f^3 D^4 \, p(y_{max}/D)$, where the reduced power $p$ comes from
+[](`~dohl.ebp.wind_power_adim`):
+
+- `cigre` and `foti`: the polynomial of Foti and Martinelli (2018); `foti`
+  lowers it with the turbulence intensity `iv`, `cigre` is the case `iv = 0`;
+- `olla`: a rational fit from the OLLA research program;
+- `bate`, `brika`, `carroll`, `diana`, `farquharson`, `pon`, `rawlins58`,
+  `rawlins83`: polynomial fits of the experimental curves compiled in the
+  EPRI Orange Book.
+
+```{python}
+import matplotlib.pyplot as plt
+import numpy as np
+
+from dohl import ebp
+
+yad = np.linspace(0.01, 1.0, 100)
+for method in ["cigre", "olla", "brika", "diana", "rawlins83"]:
+    plt.plot(yad, ebp.wind_power_adim(yad, method=method), label=method)
+plt.xlabel("ymax / D")
+plt.ylabel("reduced wind power")
+plt.legend()
+plt.show()
+```
+
+## Self-damping power
+
+[](`~dohl.ebp.damping_power`) dispatches on `method`:
+
+| Method | Inputs | Model |
+|--------|--------|-------|
+| `foti` | `mu`, `EImax`, `x0` | Foti and Martinelli (2018), micro and gross slip |
+| `olla` | `mu`, `EImin`, `EImax`, `x0` | OLLA model, numerical integration over a half wavelength (scalar inputs only) |
+| `olla_approx` | `mu`, `EImax`, `x0` | closed form of `olla` for small curvatures |
+| `noiseux1992` | `d`, `mu` | Noiseux (1992) |
+| `claren`, `kraus`, `mocks`, `noiseux1991`, `pdm`, `seppa`, `tompkins` | `d`, `mu`, `rts` | empirical law $k \, y_{max}^l f^m / T^n$ |
+
+`mu`, `d` and `rts` come from the [](`~dohl.ebp.Conductor`); `EImin`, `EImax`
+and `x0` from the [](`~dohl.ebp.Bending`). For the empirical laws the
+exponents $l$, $m$, $n$ are read from the EPRI table and $k$ is derived from
+the conductor (Lilien); a [](`~dohl.ebp.DampingCoeffs`) overrides them.
+Without a method, the exponents $l$, $m$, $n$ must be given, and $k$ unless
+the conductor is complete.
+
+The [damping power example](examples/damping_power.qmd) compares the methods
+against amplitude, frequency and tension.
+
+## Solving for the amplitude
+
+[](`~dohl.ebp.ymax`) solves the balance by bisection between $0$ and $5D$,
+vectorised over the frequencies; [](`~dohl.ebp.SolverConfig`) sets the
+tolerance and the number of iterations. The wind methods accepted by the
+solver are `cigre`, `foti`, `olla`, `pon` and `rawlins83`; every damping
+method except `noiseux1992` is accepted.
+
+With `olla` and an array of frequencies, or with Stockbridge dampers, the
+balance is solved one frequency at a time, which is slower.

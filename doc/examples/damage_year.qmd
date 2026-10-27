@@ -1,0 +1,13 @@
+---
+title: "Yearly damage against wind speed"
+---
+
+Amplitude, fictive stress, strain and yearly damage from
+[](`~dohl.lifespan.damage_year`), at six tensions, for each fictive stress
+method and bending stiffness.
+
+Source: `examples/damage_year.py`.
+
+```{python}
+{{< include ../../examples/damage_year.py >}}
+```

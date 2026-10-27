@@ -1,0 +1,66 @@
+---
+title: "dohl"
+subtitle: "Damage in overhead lines from aeolian vibration"
+---
+
+dohl estimates the fatigue damage that aeolian vibration causes in overhead
+line conductors. It chains established methods from the EPRI "Orange Book"
+and CIGRE: the vibration amplitude from an energy balance, the fictive stress
+near the clamp, the number of cycles to failure from the safe border line,
+and the damage integrated over a wind history or a wind distribution.
+
+- **Energy balance**: wind input power (CIGRE, Foti, OLLA and several
+  experimental fits) against the conductor self-damping power (Foti, OLLA,
+  Noiseux and the empirical power laws), solved for the antinode amplitude.
+- **Fatigue damage**: fictive stress from the antinode amplitude or from the
+  amplitude at 89 mm from the clamp (Poffenberger-Swart), safe border line
+  for single and multi-layer ACSR.
+- **Lifespan**: yearly damage at a given wind speed, over a time series, or
+  integrated over a Weibull wind distribution.
+- **Stockbridge dampers** (experimental): power dissipated by dampers along
+  the span, added to the energy balance.
+
+## Installation
+
+```bash
+python -m pip install "dohl @ git+https://github.com/rte-france/pallas-dohl"
+```
+
+or, with [uv](https://docs.astral.sh/uv/), `uv add "dohl @ git+https://github.com/rte-france/pallas-dohl"`.
+
+## A first look
+
+Yearly damage of an Aster 570 conductor at 15 % of its rated tensile
+strength, for wind speeds from 0.5 to 5 m/s:
+
+```{python}
+import matplotlib.pyplot as plt
+import numpy as np
+
+from dohl.lifespan import damage_year
+
+# Aster 570: lineic mass (kg/m), external and last-strand diameters (m)
+mu, D, d = 1.571, 3.105e-02, 3.45e-03
+rts, young = 1.853e05, 6.8e10  # rated tensile strength (N), Young modulus (Pa)
+EImin, EImax = 28.28, 2155.0  # bending stiffness range (N.m**2)
+alpha = 0.140652  # limit curvature at full rated tensile strength (m**-1)
+
+u = np.linspace(0.5, 5.0, 46)
+tension = 0.15 * rts
+ymax, yb, sigma, dmg = damage_year(
+    u, tension, D, d, mu, young, EImin, EImax,
+    multilayer=False, rts=rts, x0=alpha * tension / rts,
+)
+
+fig, (left, right) = plt.subplots(1, 2, figsize=(10, 3.5))
+left.plot(u, ymax / D)
+right.semilogy(u, dmg)
+left.set(title="antinode amplitude", xlabel="wind speed (m/s)", ylabel="ymax / D")
+right.set(title="damage in a year", xlabel="wind speed (m/s)", ylabel="damage (-)")
+fig.tight_layout()
+plt.show()
+```
+
+Continue with [Getting started](getting-started.qmd), the
+[user guide](ebp.qmd), the [examples](examples/index.qmd) or the
+[API reference](reference/index.qmd).

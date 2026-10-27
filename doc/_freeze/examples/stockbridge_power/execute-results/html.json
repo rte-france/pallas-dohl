@@ -1,0 +1,12 @@
+{
+  "hash": "6f9dfadd854ad46749c789df46eb8543",
+  "result": {
+    "engine": "jupyter",
+    "markdown": "---\ntitle: \"Stockbridge dissipated power\"\n---\n\n::: {.callout-warning}\nWork in progress: the dissipated power changes sign with the impedance phase,\nand its level is not validated.\n:::\n\nPower dissipated by an SDM damper against its position along the span, with\n[](`~dohl.stockbridge.power_foti`) (solid) and\n[](`~dohl.stockbridge.power_wolf`) (dashed, absolute value), for three wind\nspeeds.\n\nSource: `examples/stockbridge_power.py`.\n\n::: {#daf081a3 .cell execution_count=1}\n``` {.python .cell-code}\n\"\"\"Power dissipated by a Stockbridge damper against its position (work in progress).\n\n`dohl.stockbridge.power_foti` (solid) and `dohl.stockbridge.power_wolf`\n(dashed) for an SDM damper on a 350 m Aster 570 span at 15 % of its rated\ntensile strength, vibrating at one diameter, for three wind speeds. The sign\nof the Wolf power depends on the impedance phase; its absolute value is\nplotted.\n\"\"\"\n\nimport matplotlib.pyplot as plt\nimport numpy as np\n\nfrom dohl.stockbridge import impedance, power_foti, power_wolf\n\n# Aster 570 conductor on a 350 m span\nmu, D, rts = 1.571, 3.105e-02, 1.853e05\nL = 350.0\ntension = 0.15 * rts\n\n# SDM damper (see examples/stockbridge_impedance.py for the parameters)\nsdm = dict(\n    e1=0.0163,\n    j1=0.00841,\n    l1=0.15,\n    m1=2.65,\n    e2=0.0222,\n    j2=0.0165,\n    l2=0.197,\n    m2=3.115,\n    mm=0.835,\n    rho=7800.0,\n    a=0.0001327,\n    ej=7.7945,\n    c=1.7983,\n)\n\nu = np.array([1.0, 3.0, 5.0])\nf = u * 0.185 / D\nz = impedance(**sdm, W=2.0 * np.pi * f)\n\nymax = D\nxs = np.linspace(0, 12, 601)\np_foti = np.array([power_foti(ymax, f, tension, L, mu, x, z) for x in xs])\np_wolf = np.array([np.abs(power_wolf(ymax, f, tension, D, mu, x, z)) for x in xs])\n\nfor j in range(len(f)):\n    plt.plot(xs, p_foti[:, j], c=f\"C{j}\", label=f\"u={u[j]:.1f} m/s\")\n    plt.plot(xs, p_wolf[:, j], c=f\"C{j}\", ls=\"--\")\nplt.grid(True)\nplt.xlabel(\"Stockbridge position (m)\")\nplt.ylabel(\"Power dissipated (W)\")\nplt.legend()\nplt.show()\n```\n\n::: {.cell-output .cell-output-display}\n![](stockbridge_power_files/figure-html/cell-2-output-1.png){width=600 height=443}\n:::\n:::\n\n\n",
+    "supporting": [
+      "stockbridge_power_files"
+    ],
+    "filters": [],
+    "includes": {}
+  }
+}

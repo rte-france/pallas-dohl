@@ -1,0 +1,14 @@
+---
+title: "Amplitude for every pair of methods"
+---
+
+The antinode amplitude from [](`~dohl.ebp.ymax`) for every wind and damping
+method accepted by the solver, at three tensions. With the `olla` wind power
+the amplitude jumps at low frequency; `cigre` and `foti` (identical without
+turbulence) give realistic results with every damping method.
+
+Source: `examples/ymax_methods.py`.
+
+```{python}
+{{< include ../../examples/ymax_methods.py >}}
+```

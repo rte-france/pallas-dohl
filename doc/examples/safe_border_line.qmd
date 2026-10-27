@@ -1,0 +1,22 @@
+---
+title: "Safe border line"
+---
+
+The safe border line of [](`~dohl.damage.safe_border_line`) for single and
+multi-layer ACSR, drawn over the EPRI fatigue tests of one, two and three
+layer conductors (Orange Book, figures 3.2-23 to 3.2-25), then the curves and
+their inverse over a wide range.
+
+Source: `examples/safe_border_line.py`.
+
+```{python}
+#| echo: false
+# the script reads its images relative to the repository root
+import os
+
+os.chdir("../..")
+```
+
+```{python}
+{{< include ../../examples/safe_border_line.py >}}
+```
